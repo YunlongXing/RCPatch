@@ -45,7 +45,7 @@ class BaselineCase:
     touched_files: list[str]
     affected_functions: list[str]
     canary_conditions: list[str]
-    bugrc_claim: str | None
+    bugrc_paper_claim: str | None
     bugrc_semantic_verdict: str | None
 
 
@@ -75,7 +75,7 @@ def row_to_case(row: dict[str, Any]) -> BaselineCase:
         touched_files=[str(v) for v in row.get("touched_files") or []],
         affected_functions=[str(v) for v in row.get("affected_functions") or []],
         canary_conditions=[str(v) for v in row.get("canary_conditions") or []],
-        bugrc_claim=nested_patch_claim(row, "claim_label"),
+        bugrc_paper_claim=nested_patch_claim(row, "paper_claim"),
         bugrc_semantic_verdict=nested_patch_claim(row, "verdict"),
     )
 
@@ -99,7 +99,7 @@ def select_subset(rows: list[dict[str, Any]], sample_size: int, per_target: int)
         candidates = sorted(by_target[target], key=lambda item: str(item.get("bug_id") or ""))
         bucket: list[dict[str, Any]] = []
         for claim in preferred_claims:
-            match = next((row for row in candidates if nested_patch_claim(row, "claim_label") == claim), None)
+            match = next((row for row in candidates if nested_patch_claim(row, "paper_claim") == claim), None)
             if match is not None and match not in bucket:
                 bucket.append(match)
             if len(bucket) >= per_target:
@@ -301,7 +301,7 @@ def write_subset_outputs(cases: list[BaselineCase], output_dir: Path) -> list[di
             "touched_files": case.touched_files,
             "affected_functions": case.affected_functions,
             "canary_conditions": case.canary_conditions,
-            "bugrc_claim": case.bugrc_claim,
+            "bugrc_paper_claim": case.bugrc_paper_claim,
             "bugrc_semantic_verdict": case.bugrc_semantic_verdict,
             "vulrepair_input": extracted,
         }

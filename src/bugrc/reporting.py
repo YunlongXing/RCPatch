@@ -304,7 +304,12 @@ def _chain_payload(chain: Any) -> dict[str, Any]:
 
 
 def _candidate_row(candidate: Any) -> str:
-    pattern = candidate.features.get("matched_bug_pattern") or candidate.features.get("cve_pattern_prior_category") or "none"
+    pattern = (
+        candidate.features.get("matched_bug_pattern")
+        or candidate.features.get("cve_pattern_prior_category")
+        or candidate.features.get("expert_rca_prior_category")
+        or "none"
+    )
     location = f"{candidate.location.file}:{candidate.location.line}"
     if candidate.location.function:
         location += f" in {candidate.location.function}"

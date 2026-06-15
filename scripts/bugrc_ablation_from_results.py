@@ -465,7 +465,7 @@ def write_summary(results_path: Path, summary_path: Path, *, dataset: str, varia
             pseudo[key] = pseudo.get(key, 0) + 1
         llm = ((row.get("patch_comparison") or {}).get("llm") or {})
         verdict = llm.get("verdict")
-        claim = llm.get("claim_label")
+        claim = llm.get("paper_claim")
         if verdict:
             verdicts[str(verdict)] = verdicts.get(str(verdict), 0) + 1
         if claim:
@@ -490,7 +490,7 @@ def write_summary(results_path: Path, summary_path: Path, *, dataset: str, varia
             "success_rate": round(success_count / len(rows), 4) if rows else 0.0,
             "status_distribution": statuses,
             "semantic_verdict_distribution": verdicts,
-            "claim_distribution": claims,
+            "paper_claim_distribution": claims,
             "generated_patch_is_pseudo_distribution": pseudo,
             "confidence_bins": confidence_bins,
             "updated_at_epoch": time.time(),

@@ -4,7 +4,7 @@
 This script is intentionally lighter than dynamic reproducer validation.  It
 does not build Magma targets; instead it creates a clean detached worktree from
 each recorded pre-fix Magma worktree and checks whether BugRC's generated
-unified diff can be applied there.  The output is useful as a artifact-facing
+unified diff can be applied there.  The output is useful as a paper-facing
 sanity check: a semantic patch judgment is much stronger when the patch also
 materializes against the buggy source revision.
 """
@@ -130,7 +130,7 @@ def validate_one(record: dict[str, Any], args: argparse.Namespace) -> dict[str, 
         "magma_patch_path": record.get("magma_patch_path"),
         "pre_fix_worktree": source_worktree.as_posix() if source_worktree else None,
         "semantic_verdict": llm.get("verdict"),
-        "claim_label": llm.get("claim_label"),
+        "paper_claim": llm.get("paper_claim"),
         "semantic_confidence": llm.get("confidence"),
         "generated_patch_is_pseudo": ((record.get("generated_patch") or {}).get("payload") or {}).get("is_pseudo"),
         "generated_patch_length": len(generated_diff),
@@ -946,7 +946,7 @@ def write_summary(results_path: Path, summary_path: Path) -> None:
         "status_distribution": dict(Counter(record.get("status") for record in records)),
         "target_distribution": dict(Counter(record.get("target") for record in records)),
         "semantic_verdict_distribution": dict(Counter(record.get("semantic_verdict") for record in records)),
-        "claim_distribution": dict(Counter(record.get("claim_label") for record in records)),
+        "paper_claim_distribution": dict(Counter(record.get("paper_claim") for record in records)),
         "patch_apply_distribution": dict(Counter(str((record.get("patch_apply") or {}).get("applied")) for record in records)),
         "apply_reason_distribution": dict(Counter((record.get("patch_apply") or {}).get("reason") for record in records)),
         "apply_method_distribution": dict(Counter((record.get("patch_apply") or {}).get("applied_method") for record in records)),
@@ -955,7 +955,7 @@ def write_summary(results_path: Path, summary_path: Path) -> None:
         "failure_taxonomy_distribution": dict(Counter(failure_taxonomy(record) for record in records if not ((record.get("patch_apply") or {}).get("applied")))),
         "updated_at_epoch": time.time(),
     }
-    summary["patch_apply_by_claim_label"] = nested_counter(records, "claim_label")
+    summary["patch_apply_by_paper_claim"] = nested_counter(records, "paper_claim")
     summary["patch_apply_by_semantic_verdict"] = nested_counter(records, "semantic_verdict")
     summary["applied_examples"] = examples(records, applied=True)
     summary["failed_examples"] = examples(records, applied=False)
@@ -982,7 +982,7 @@ def examples(records: list[dict[str, Any]], *, applied: bool, limit: int = 8) ->
                 "local_id": record.get("local_id"),
                 "target": record.get("target"),
                 "semantic_verdict": record.get("semantic_verdict"),
-                "claim_label": record.get("claim_label"),
+                "paper_claim": record.get("paper_claim"),
                 "reason": patch_apply.get("reason"),
                 "method": patch_apply.get("applied_method"),
                 "changed_files": patch_apply.get("changed_files"),

@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "schema_version": "bugrc.expert_rca_prior.v1",
+    "description": "Example expert-curated RCA prior. Project Zero-style RCA records can be normalized into this shape."
+  },
+  "records": [
+    {
+      "record_id": "project-zero-style-size-overflow",
+      "source": "google_project_zero_rca",
+      "url": "https://example.invalid/project-zero-rca",
+      "cve_id": "CVE-YYYY-NNNN",
+      "product": "example-browser",
+      "bug_class": "Integer overflow leading to out-of-bounds access",
+      "vulnerability_details": "A length calculation trusts attacker-controlled input and allocates a buffer that is too small.",
+      "root_cause_summary": "The root cause is an unchecked size computation that later controls allocation and copy bounds.",
+      "patch_analysis": "The fix validates the length before allocation and rejects inputs that would exceed the destination buffer.",
+      "exploit_flow": "Malformed input influences length, length controls allocation, and a later copy writes beyond the allocation.",
+      "variant_analysis": "Related parsers should audit size calculations that feed allocation or copy operations.",
+      "structural_improvements": "Centralize bounds validation for length fields before allocation.",
+      "pattern_tags": [
+        "incorrect_size_computation",
+        "validation_or_guard_issue"
+      ],
+      "operation_types": [
+        "length_calculation",
+        "guard_condition"
+      ],
+      "confidence": 0.95
+    }
+  ]
+}

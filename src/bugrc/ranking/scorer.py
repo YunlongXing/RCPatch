@@ -30,6 +30,7 @@ class CandidateScorer:
         "contract_mismatch": 0.14,
         "cve_pattern_prior": 0.12,
         "project_prior": 0.08,
+        "expert_rca_prior": 0.06,
     }
     DEFAULT_PENALTY_WEIGHTS = {
         "trigger_symptom": 0.32,
@@ -91,6 +92,11 @@ class CandidateScorer:
                 min(float(features.get("project_prior_weight", self.contribution_weights["project_prior"])), 0.3),
             )
             * float(features.get("project_prior_score", 0.0)),
+            "expert_rca_prior": max(
+                0.0,
+                min(float(features.get("expert_rca_prior_weight", self.contribution_weights["expert_rca_prior"])), 0.25),
+            )
+            * float(features.get("expert_rca_prior_score", 0.0)),
         }
         calibrated_feature_boost = self._calibrated_feature_boost(features)
         calibrated_pattern_boost = self.pattern_boosts.get(str(features.get("matched_bug_pattern") or "").lower(), 0.0)
@@ -120,6 +126,7 @@ class CandidateScorer:
         elif score >= self.root_cause_threshold and (
             float(features["bug_pattern_score"]) >= 0.6
             or float(features.get("cve_pattern_prior_score", 0.0)) >= 0.65
+            or float(features.get("expert_rca_prior_score", 0.0)) >= 0.7
             or bool(features["has_integer_influence"])
             or bool(features["has_memory_context"])
             or bool(features["affects_control_flow"])

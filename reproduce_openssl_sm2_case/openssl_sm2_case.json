@@ -1,6 +1,6 @@
 {
   "bug_id": "openssl_1_1_1k_sm2_decrypt_line355_user",
-  "repo_path": "openssl-sm2-mini",
+  "repo_path": "reproduce_openssl_sm2_case/openssl-sm2-mini",
   "language": "c_cpp",
   "title": "Potential overflow in OpenSSL sm2_decrypt",
   "summary": "The XOR copy in sm2_decrypt may overflow when msg_len derived from the ciphertext exceeds the effective plaintext output capacity.",

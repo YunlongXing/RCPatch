@@ -82,6 +82,10 @@ def build_run_manifest(
     if isinstance(cve_library_path, str) and cve_library_path:
         inputs["cve_pattern_library"] = fingerprint_file(_resolve_input_path(cve_library_path, bug_report.repo_path))
 
+    expert_rca_prior_path = getattr(config, "expert_rca_prior_path", None)
+    if isinstance(expert_rca_prior_path, str) and expert_rca_prior_path:
+        inputs["expert_rca_prior"] = fingerprint_file(_resolve_input_path(expert_rca_prior_path, bug_report.repo_path))
+
     patch_evidence = getattr(bug_report, "patch_evidence", None)
     if patch_evidence is not None and getattr(patch_evidence, "diff_path", None):
         inputs["patch_diff"] = fingerprint_file(getattr(patch_evidence, "diff_path"))
@@ -108,6 +112,7 @@ def build_run_manifest(
         "chain_count": len(chains or []),
         "has_analysis_result": analysis_result is not None,
         "cve_pattern_prior_enabled": bool(getattr(config, "enable_cve_pattern_prior", False)),
+        "expert_rca_prior_enabled": bool(getattr(config, "enable_expert_rca_prior", False)),
         "patch_analysis_enabled": bool(getattr(config, "enable_patch_analysis", False)),
         "llm_enabled": bool(getattr(config, "enable_llm", False)),
     }
@@ -173,6 +178,9 @@ def _resolve_input_path(path: str, repo_path: str) -> Path:
     candidate = Path(path).expanduser()
     if candidate.is_absolute():
         return candidate
+    cwd_candidate = (Path.cwd() / candidate).resolve()
+    if cwd_candidate.exists():
+        return cwd_candidate
     return Path(repo_path).expanduser().resolve() / candidate
 
 

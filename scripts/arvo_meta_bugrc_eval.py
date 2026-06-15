@@ -106,6 +106,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cve-pattern-library", help="Optional BugRC CVE pattern library JSON.")
     parser.add_argument("--ranker-calibration", help="Optional BugRC ranker calibration JSON.")
     parser.add_argument("--project-prior", help="Optional BugRC project prior JSON.")
+    parser.add_argument("--expert-rca-prior", help="Optional expert RCA prior JSON, e.g., Project Zero RCA patterns.")
+    parser.add_argument("--expert-rca-min-confidence", type=float, default=0.0)
+    parser.add_argument("--expert-rca-weight", type=float, default=0.06)
     parser.add_argument(
         "--include-bugrc-patch-suggestions",
         action=argparse.BooleanOptionalAction,
@@ -295,6 +298,9 @@ def process_case(
         cve_pattern_library=args.cve_pattern_library,
         ranker_calibration=args.ranker_calibration,
         project_prior=args.project_prior,
+        expert_rca_prior=args.expert_rca_prior,
+        expert_rca_min_confidence=args.expert_rca_min_confidence,
+        expert_rca_weight=args.expert_rca_weight,
         include_patch_suggestions=args.include_bugrc_patch_suggestions,
     )
     snippets = collect_source_snippets(worktree_path, bugrc_payload, max_chars=args.max_snippet_chars)
@@ -356,6 +362,9 @@ def run_bugrc_analysis(
     cve_pattern_library: Optional[str],
     ranker_calibration: Optional[str],
     project_prior: Optional[str],
+    expert_rca_prior: Optional[str],
+    expert_rca_min_confidence: float,
+    expert_rca_weight: float,
     include_patch_suggestions: bool,
 ) -> dict[str, Any]:
     parser = SourceProjectParser()
@@ -394,6 +403,10 @@ def run_bugrc_analysis(
         ranker_calibration_path=ranker_calibration,
         enable_project_prior=bool(project_prior),
         project_prior_path=project_prior,
+        enable_expert_rca_prior=bool(expert_rca_prior),
+        expert_rca_prior_path=expert_rca_prior,
+        expert_rca_prior_min_confidence=expert_rca_min_confidence,
+        expert_rca_prior_weight=expert_rca_weight,
     )
     bug_report = BugReport(
         bug_id=f"arvo-{local_id}",
@@ -689,7 +702,7 @@ Return JSON with:
   "official_patch_limitation": "none | symptom_only | compensating_guard | incomplete_path_coverage | wrong_location | refactor_or_cleanup | unknown",
   "missed_paths_by_official_patch": ["..."],
   "patch_proof_strength": "strong | moderate | weak | not_proven",
-  "claim_label": "official_incomplete_bugrc_blocks | bugrc_better_but_needs_validation | official_and_bugrc_both_cut_path | not_enough_evidence",
+  "paper_claim": "official_incomplete_bugrc_blocks | bugrc_better_but_needs_validation | official_and_bugrc_both_cut_path | not_enough_evidence",
   "resource_balance_assessment": "...",
   "reasoning": "...",
   "confidence": 0.0

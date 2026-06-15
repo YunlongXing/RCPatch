@@ -112,6 +112,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cve-pattern-library", help="Optional BugRC CVE pattern library JSON.")
     parser.add_argument("--ranker-calibration", help="Optional BugRC ranker calibration JSON.")
     parser.add_argument("--project-prior", help="Optional BugRC project prior JSON.")
+    parser.add_argument("--expert-rca-prior", help="Optional expert RCA prior JSON, e.g., Project Zero RCA patterns.")
+    parser.add_argument("--expert-rca-min-confidence", type=float, default=0.0)
+    parser.add_argument("--expert-rca-weight", type=float, default=0.06)
     parser.add_argument(
         "--include-bugrc-patch-suggestions",
         action=argparse.BooleanOptionalAction,
@@ -355,6 +358,9 @@ def process_case(
         cve_pattern_library=args.cve_pattern_library,
         ranker_calibration=args.ranker_calibration,
         project_prior=args.project_prior,
+        expert_rca_prior=args.expert_rca_prior,
+        expert_rca_min_confidence=args.expert_rca_min_confidence,
+        expert_rca_weight=args.expert_rca_weight,
         include_patch_suggestions=args.include_bugrc_patch_suggestions,
     )
     snippets = collect_source_snippets(worktree_path, bugrc_payload, max_chars=args.max_snippet_chars)
@@ -596,6 +602,9 @@ def run_magma_bugrc_analysis(
     cve_pattern_library: Optional[str],
     ranker_calibration: Optional[str],
     project_prior: Optional[str],
+    expert_rca_prior: Optional[str],
+    expert_rca_min_confidence: float,
+    expert_rca_weight: float,
     include_patch_suggestions: bool,
 ) -> dict[str, Any]:
     parser = SourceProjectParser()
@@ -642,6 +651,10 @@ def run_magma_bugrc_analysis(
         ranker_calibration_path=ranker_calibration,
         enable_project_prior=bool(project_prior),
         project_prior_path=project_prior,
+        enable_expert_rca_prior=bool(expert_rca_prior),
+        expert_rca_prior_path=expert_rca_prior,
+        expert_rca_prior_min_confidence=expert_rca_min_confidence,
+        expert_rca_prior_weight=expert_rca_weight,
     )
     bug_report = BugReport(
         bug_id=f"magma-{case.bug_id}",
@@ -772,7 +785,7 @@ Return JSON with:
   "magma_reference_limitation": "none | symptom_only | compensating_guard | incomplete_path_coverage | wrong_location | instrumentation_only | unknown",
   "missed_paths_by_bugrc_patch": ["..."],
   "patch_proof_strength": "strong | moderate | weak | not_proven",
-  "claim_label": "bugrc_matches_ground_truth | bugrc_blocks_better_than_magma_reference | bugrc_incomplete | not_enough_evidence",
+  "paper_claim": "bugrc_matches_ground_truth | bugrc_blocks_better_than_magma_reference | bugrc_incomplete | not_enough_evidence",
   "resource_balance_assessment": "...",
   "reasoning": "...",
   "confidence": 0.0
@@ -824,7 +837,7 @@ def write_summary(results_path: Path, summary_path: Path) -> None:
     targets: dict[str, int] = {}
     comparison: dict[str, int] = {}
     verdicts: dict[str, int] = {}
-    claim_labels: dict[str, int] = {}
+    paper_claims: dict[str, int] = {}
     pseudo: dict[str, int] = {}
     for record in records:
         statuses[str(record.get("status"))] = statuses.get(str(record.get("status")), 0) + 1
@@ -838,11 +851,11 @@ def write_summary(results_path: Path, summary_path: Path) -> None:
             comparison[str(comp.get("status"))] = comparison.get(str(comp.get("status")), 0) + 1
             llm = comp.get("llm") or {}
             verdict = llm.get("verdict")
-            claim = llm.get("claim_label")
+            claim = llm.get("paper_claim")
             if verdict:
                 verdicts[str(verdict)] = verdicts.get(str(verdict), 0) + 1
             if claim:
-                claim_labels[str(claim)] = claim_labels.get(str(claim), 0) + 1
+                paper_claims[str(claim)] = paper_claims.get(str(claim), 0) + 1
     write_json(
         summary_path,
         {
@@ -851,7 +864,7 @@ def write_summary(results_path: Path, summary_path: Path) -> None:
             "target_distribution": targets,
             "patch_comparison_distribution": comparison,
             "semantic_verdict_distribution": verdicts,
-            "claim_distribution": claim_labels,
+            "paper_claim_distribution": paper_claims,
             "generated_patch_is_pseudo_distribution": pseudo,
             "updated_at_epoch": time.time(),
         },

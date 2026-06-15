@@ -20,6 +20,7 @@ EXAMPLE_COMMANDS = """Examples:
   bugrc ingest bug.json --output-dir out/ingest
   bugrc analyze bug.json --parser-backend regex --patch-aware --output-dir out/analyze
   bugrc analyze bug.json --cve-pattern-library pattern_library_v4/cve_pattern_library.v4.clean.json --output-dir out/analyze
+  bugrc analyze bug.json --expert-rca-prior data/project_zero_rca_prior.json --output-dir out/analyze
   bugrc analyze bug.json --ranker-calibration arvo_ranker_calibration.json --project-prior project_prior.json --output-dir out/analyze
   bugrc rank bug.json --config analysis_overrides.json --top-k 3 --output-dir out/rank
   bugrc explain bug.json --output-dir out/explain
@@ -424,6 +425,30 @@ def _add_analysis_arguments(parser: argparse.ArgumentParser, *, include_llm: boo
         type=float,
         help="Maximum additive score contribution from the project prior.",
     )
+    parser.add_argument(
+        "--expert-rca-prior",
+        dest="expert_rca_prior_path",
+        help="Optional JSON file with expert-curated RCA priors, such as Project Zero-style RCAs.",
+    )
+    parser.add_argument(
+        "--enable-expert-rca-prior",
+        dest="enable_expert_rca_prior",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Enable or disable expert-curated RCA ranking priors.",
+    )
+    parser.add_argument(
+        "--expert-rca-min-confidence",
+        dest="expert_rca_prior_min_confidence",
+        type=float,
+        help="Minimum confidence required for expert RCA records to affect ranking.",
+    )
+    parser.add_argument(
+        "--expert-rca-weight",
+        dest="expert_rca_prior_weight",
+        type=float,
+        help="Maximum additive score contribution from the expert RCA prior.",
+    )
     if include_llm:
         parser.add_argument(
             "--llm",
@@ -473,6 +498,10 @@ def _config_overrides_from_args(args: argparse.Namespace, *, include_llm: bool) 
     enable_project_prior = getattr(args, "enable_project_prior", None)
     if enable_project_prior is None and project_prior_path:
         enable_project_prior = True
+    expert_rca_prior_path = getattr(args, "expert_rca_prior_path", None)
+    enable_expert_rca_prior = getattr(args, "enable_expert_rca_prior", None)
+    if enable_expert_rca_prior is None and expert_rca_prior_path:
+        enable_expert_rca_prior = True
     return build_analysis_config_overrides(
         parser_backend=getattr(args, "parser_backend", None),
         top_k_candidates=getattr(args, "top_k", None),
@@ -496,6 +525,10 @@ def _config_overrides_from_args(args: argparse.Namespace, *, include_llm: bool) 
         enable_project_prior=enable_project_prior,
         project_prior_path=project_prior_path,
         project_prior_weight=getattr(args, "project_prior_weight", None),
+        enable_expert_rca_prior=enable_expert_rca_prior,
+        expert_rca_prior_path=expert_rca_prior_path,
+        expert_rca_prior_min_confidence=getattr(args, "expert_rca_prior_min_confidence", None),
+        expert_rca_prior_weight=getattr(args, "expert_rca_prior_weight", None),
     )
 
 

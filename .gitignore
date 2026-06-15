@@ -24,3 +24,4 @@ magma/
 !results/magma/**
 cvelistV5/
 source-validation-repos/
+reproduce_openssl_sm2_case/bugrc-output/

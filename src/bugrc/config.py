@@ -56,6 +56,10 @@ def build_analysis_config_overrides(
     enable_project_prior: Optional[bool] = None,
     project_prior_path: Optional[str] = None,
     project_prior_weight: Optional[float] = None,
+    enable_expert_rca_prior: Optional[bool] = None,
+    expert_rca_prior_path: Optional[str] = None,
+    expert_rca_prior_min_confidence: Optional[float] = None,
+    expert_rca_prior_weight: Optional[float] = None,
 ) -> dict[str, object]:
     """Build a compact config-override payload from runtime flags."""
 
@@ -88,6 +92,14 @@ def build_analysis_config_overrides(
         overrides["project_prior_path"] = project_prior_path
     if project_prior_weight is not None:
         overrides["project_prior_weight"] = project_prior_weight
+    if enable_expert_rca_prior is not None:
+        overrides["enable_expert_rca_prior"] = enable_expert_rca_prior
+    if expert_rca_prior_path:
+        overrides["expert_rca_prior_path"] = expert_rca_prior_path
+    if expert_rca_prior_min_confidence is not None:
+        overrides["expert_rca_prior_min_confidence"] = expert_rca_prior_min_confidence
+    if expert_rca_prior_weight is not None:
+        overrides["expert_rca_prior_weight"] = expert_rca_prior_weight
     return overrides
 
 

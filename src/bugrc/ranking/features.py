@@ -22,6 +22,7 @@ from bugrc.models import (
     StatementKind,
 )
 from bugrc.ranking.cve_prior import CVEPatternPrior, infer_operation_type
+from bugrc.ranking.expert_prior import ExpertRCAPrior
 from bugrc.ranking.project_prior import ProjectPrior, infer_project_name
 
 # Token lists below are deliberately lightweight heuristics. They make the
@@ -83,6 +84,7 @@ class CandidateFeatureExtractor:
         self.logger = get_logger(__name__)
         self._cve_pattern_prior_cache: dict[tuple[str, int, float], Optional[CVEPatternPrior]] = {}
         self._project_prior_cache: dict[str, Optional[ProjectPrior]] = {}
+        self._expert_rca_prior_cache: dict[tuple[str, float], Optional[ExpertRCAPrior]] = {}
 
     def extract(self, bug_report: BugReport, backward_slice: BackwardSlice) -> list[CandidateObservation]:
         """Extract candidate observations from a backward slice."""
@@ -91,6 +93,7 @@ class CandidateFeatureExtractor:
 
         cve_pattern_prior = self._load_cve_pattern_prior(bug_report)
         project_prior = self._load_project_prior(bug_report)
+        expert_rca_prior = self._load_expert_rca_prior(bug_report)
         observations: list[CandidateObservation] = []
         for node in backward_slice.nodes:
             features, evidence = self._extract_node_features(
@@ -101,6 +104,7 @@ class CandidateFeatureExtractor:
                 bug_type_hint=bug_type_hint,
                 cve_pattern_prior=cve_pattern_prior,
                 project_prior=project_prior,
+                expert_rca_prior=expert_rca_prior,
             )
             label = self._classify(features)
             explanation = self._build_explanation(node=node, features=features, label=label)
@@ -157,6 +161,7 @@ class CandidateFeatureExtractor:
         bug_type_hint: Optional[BugType],
         cve_pattern_prior: Optional[CVEPatternPrior],
         project_prior: Optional[ProjectPrior],
+        expert_rca_prior: Optional[ExpertRCAPrior],
     ) -> tuple[dict[str, object], list[EvidenceReference]]:
         outgoing_edges = graph.outgoing_edges.get(node.node_id, [])
         incoming_edges = graph.incoming_edges.get(node.node_id, [])
@@ -271,6 +276,20 @@ class CandidateFeatureExtractor:
                 # in an already-detected pattern, but do not replace source facts.
                 bug_pattern_score = min(bug_pattern_score + 0.12 * cve_pattern_match.score, 1.0)
                 inferred_operation_type = cve_pattern_match.operation_type
+        expert_rca_match = None
+        if expert_rca_prior is not None:
+            expert_rca_match = expert_rca_prior.match(
+                category=matched_bug_pattern,
+                operation_type=inferred_operation_type,
+                text_lower=text_lower,
+                bug_type=bug_type_hint.value if bug_type_hint is not None else None,
+            )
+            if expert_rca_match is not None:
+                # Expert RCA corpora are high-quality but small. They can
+                # clarify an existing pattern but cannot introduce candidates.
+                bug_pattern_score = min(bug_pattern_score + 0.08 * expert_rca_match.score, 1.0)
+                if inferred_operation_type in {"", "none", "unknown"}:
+                    inferred_operation_type = expert_rca_match.operation_type
         project_prior_match = None
         if project_prior is not None:
             project_name = infer_project_name(bug_report.repo_path, bug_report.metadata)
@@ -306,6 +325,16 @@ class CandidateFeatureExtractor:
             "project_prior_project": project_prior_match.project if project_prior_match else None,
             "project_prior_key": project_prior_match.matched_key if project_prior_match else None,
             "project_prior_reason": project_prior_match.reason if project_prior_match else None,
+            "expert_rca_prior_enabled": expert_rca_prior is not None,
+            "expert_rca_prior_score": round(expert_rca_match.score, 4) if expert_rca_match else 0.0,
+            "expert_rca_prior_weight": bug_report.analysis_config.expert_rca_prior_weight,
+            "expert_rca_prior_confidence": expert_rca_match.confidence if expert_rca_match else 0.0,
+            "expert_rca_prior_category": expert_rca_match.category if expert_rca_match else None,
+            "expert_rca_prior_operation": expert_rca_match.operation_type if expert_rca_match else None,
+            "expert_rca_prior_ids": list(expert_rca_match.record_ids) if expert_rca_match else [],
+            "expert_rca_prior_source": expert_rca_match.source if expert_rca_match else None,
+            "expert_rca_prior_terms": list(expert_rca_match.matched_terms) if expert_rca_match else [],
+            "expert_rca_prior_reason": expert_rca_match.reason if expert_rca_match else None,
             "inferred_operation_type": inferred_operation_type,
             "runtime_support_score": round(runtime_support_score, 4),
             "runtime_support_exact": runtime_support_score >= 0.7,
@@ -333,6 +362,7 @@ class CandidateFeatureExtractor:
         affects_control_flow = bool(features["affects_control_flow"])
         bug_pattern_score = float(features["bug_pattern_score"])
         cve_pattern_prior_score = float(features.get("cve_pattern_prior_score", 0.0))
+        expert_rca_prior_score = float(features.get("expert_rca_prior_score", 0.0))
         is_return_statement = bool(features["is_return_statement"])
         is_call_forwarding_statement = bool(features["is_call_forwarding_statement"])
 
@@ -343,7 +373,7 @@ class CandidateFeatureExtractor:
         if (
             distance_to_trigger >= 1
             and (defines_value_used_later or changes_object_state or affects_control_flow)
-            and (bug_pattern_score >= 0.55 or cve_pattern_prior_score >= 0.65)
+            and (bug_pattern_score >= 0.55 or cve_pattern_prior_score >= 0.65 or expert_rca_prior_score >= 0.7)
         ):
             return CandidateLabel.ROOT_CAUSE_CANDIDATE
         if distance_to_trigger >= 2 and (defines_value_used_later or changes_object_state):
@@ -430,9 +460,7 @@ class CandidateFeatureExtractor:
         if not config.enable_cve_pattern_prior or not config.cve_pattern_library_path:
             return None
 
-        library_path = Path(config.cve_pattern_library_path).expanduser()
-        if not library_path.is_absolute():
-            library_path = Path(bug_report.repo_path).expanduser().resolve() / library_path
+        library_path = _resolve_prior_path(config.cve_pattern_library_path, bug_report.repo_path)
         key = (
             library_path.as_posix(),
             config.cve_pattern_min_support,
@@ -455,9 +483,7 @@ class CandidateFeatureExtractor:
         config = bug_report.analysis_config
         if not config.enable_project_prior or not config.project_prior_path:
             return None
-        prior_path = Path(config.project_prior_path).expanduser()
-        if not prior_path.is_absolute():
-            prior_path = Path(bug_report.repo_path).expanduser().resolve() / prior_path
+        prior_path = _resolve_prior_path(config.project_prior_path, bug_report.repo_path)
         key = prior_path.as_posix()
         if key not in self._project_prior_cache:
             try:
@@ -467,6 +493,24 @@ class CandidateFeatureExtractor:
                 self.logger.warning("Could not load project prior from %s: %s", prior_path, exc)
                 self._project_prior_cache[key] = None
         return self._project_prior_cache[key]
+
+    def _load_expert_rca_prior(self, bug_report: BugReport) -> Optional[ExpertRCAPrior]:
+        config = bug_report.analysis_config
+        if not config.enable_expert_rca_prior or not config.expert_rca_prior_path:
+            return None
+        prior_path = _resolve_prior_path(config.expert_rca_prior_path, bug_report.repo_path)
+        key = (prior_path.as_posix(), config.expert_rca_prior_min_confidence)
+        if key not in self._expert_rca_prior_cache:
+            try:
+                self._expert_rca_prior_cache[key] = ExpertRCAPrior.from_file(
+                    prior_path,
+                    min_confidence=config.expert_rca_prior_min_confidence,
+                )
+                self.logger.info("Loaded expert RCA prior from %s", prior_path)
+            except Exception as exc:
+                self.logger.warning("Could not load expert RCA prior from %s: %s", prior_path, exc)
+                self._expert_rca_prior_cache[key] = None
+        return self._expert_rca_prior_cache[key]
 
     @staticmethod
     def _module_proximity(candidate_file: str, trigger_file: str) -> float:
@@ -579,3 +623,13 @@ class CandidateFeatureExtractor:
             return False
         lhs = text.split("=", 1)[0].strip()
         return lhs.startswith("*") or "[" in lhs
+
+
+def _resolve_prior_path(path: str, repo_path: str) -> Path:
+    candidate = Path(path).expanduser()
+    if candidate.is_absolute():
+        return candidate
+    cwd_candidate = (Path.cwd() / candidate).resolve()
+    if cwd_candidate.exists():
+        return cwd_candidate
+    return Path(repo_path).expanduser().resolve() / candidate

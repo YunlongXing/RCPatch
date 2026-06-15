@@ -401,6 +401,26 @@ class AnalysisConfig(BugRCModel):
         le=0.3,
         description="Maximum additive score contribution from project-specific priors.",
     )
+    enable_expert_rca_prior: bool = Field(
+        default=False,
+        description="Whether expert-curated RCA priors should weakly influence ranking.",
+    )
+    expert_rca_prior_path: Optional[str] = Field(
+        default=None,
+        description="Optional JSON file containing expert-curated RCA records, such as Project Zero-style RCAs.",
+    )
+    expert_rca_prior_min_confidence: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Minimum confidence required for expert RCA records to influence ranking.",
+    )
+    expert_rca_prior_weight: float = Field(
+        default=0.06,
+        ge=0.0,
+        le=0.25,
+        description="Maximum additive score contribution from expert-curated RCA priors.",
+    )
     metadata: dict[str, Any] = Field(default_factory=dict, description="Extension space for run-level configuration metadata.")
 
 

@@ -120,7 +120,7 @@ def select_core_cases(
         str(row.get("local_id")): row
         for row in load_jsonl(materialization_results)
         if (row.get("patch_apply") or {}).get("applied") is True
-        and row.get("claim_label") == "bugrc_blocks_better_than_magma_reference"
+        and row.get("paper_claim") == "bugrc_blocks_better_than_magma_reference"
     }
     selected: list[dict[str, Any]] = []
     for row in load_jsonl(magma_results):
@@ -136,7 +136,7 @@ def select_core_cases(
                 "bug_id": row.get("bug_id"),
                 "target": row.get("target"),
                 "semantic_verdict": ((row.get("patch_comparison") or {}).get("llm") or {}).get("verdict"),
-                "claim_label": mat.get("claim_label"),
+                "paper_claim": mat.get("paper_claim"),
                 "materialization_method": (mat.get("patch_apply") or {}).get("applied_method"),
                 "materialization_reason": (mat.get("patch_apply") or {}).get("reason"),
                 "materialized_changed_files": (mat.get("patch_apply") or {}).get("changed_files"),
@@ -201,7 +201,7 @@ def validate_case(selected: dict[str, Any], case: dict[str, Any], args: argparse
         "local_id": case_id,
         "target": target,
         "semantic_verdict": selected.get("semantic_verdict"),
-        "claim_label": selected.get("claim_label"),
+        "paper_claim": selected.get("paper_claim"),
         "materialization_method": selected.get("materialization_method"),
         "setup_patch_results": setup_patch_results,
         "patch_apply": patch_apply,
