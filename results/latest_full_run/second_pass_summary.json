@@ -1,0 +1,143 @@
+{
+  "expected_count": 2378,
+  "raw_record_count": 2387,
+  "record_count": 2378,
+  "completed_count": 2378,
+  "status_distribution": {
+    "completed": 2378
+  },
+  "validated_verdict_distribution": {
+    "confirmed_bugrc_better": 2202,
+    "reference_better": 2,
+    "not_enough_evidence": 1,
+    "confirmed_equivalent": 173
+  },
+  "by_dataset": {
+    "arvo": {
+      "count": 2253,
+      "buckets": {
+        "0.90-0.99": 2243,
+        ">=0.99": 9,
+        "0.85-0.90": 1
+      },
+      "validated_verdicts": {
+        "confirmed_bugrc_better": 2182,
+        "reference_better": 1,
+        "not_enough_evidence": 1,
+        "confirmed_equivalent": 69
+      }
+    },
+    "magma": {
+      "count": 125,
+      "buckets": {
+        "0.90-0.99": 125
+      },
+      "validated_verdicts": {
+        "confirmed_bugrc_better": 20,
+        "confirmed_equivalent": 104,
+        "reference_better": 1
+      }
+    }
+  },
+  "by_input_verdict": {
+    "bugrc_patch_better": {
+      "count": 2200,
+      "buckets": {
+        "0.90-0.99": 2190,
+        ">=0.99": 9,
+        "0.85-0.90": 1
+      },
+      "validated_verdicts": {
+        "confirmed_bugrc_better": 2198,
+        "reference_better": 1,
+        "not_enough_evidence": 1
+      }
+    },
+    "semantically_equivalent": {
+      "count": 178,
+      "buckets": {
+        "0.90-0.99": 178
+      },
+      "validated_verdicts": {
+        "confirmed_equivalent": 173,
+        "reference_better": 1,
+        "confirmed_bugrc_better": 4
+      }
+    }
+  },
+  "by_confidence_bucket": {
+    ">=0.99": {
+      "count": 9,
+      "buckets": {
+        ">=0.99": 9
+      },
+      "validated_verdicts": {
+        "confirmed_bugrc_better": 8,
+        "reference_better": 1
+      }
+    },
+    "0.90-0.99": {
+      "count": 2368,
+      "buckets": {
+        "0.90-0.99": 2368
+      },
+      "validated_verdicts": {
+        "confirmed_bugrc_better": 2193,
+        "not_enough_evidence": 1,
+        "confirmed_equivalent": 173,
+        "reference_better": 1
+      }
+    },
+    "0.85-0.90": {
+      "count": 1,
+      "buckets": {
+        "0.85-0.90": 1
+      },
+      "validated_verdicts": {
+        "confirmed_bugrc_better": 1
+      }
+    },
+    "0.80-0.85": {
+      "count": 0,
+      "validated_verdicts": {}
+    },
+    "0.70-0.80": {
+      "count": 0,
+      "validated_verdicts": {}
+    },
+    "<0.70": {
+      "count": 0,
+      "validated_verdicts": {}
+    }
+  },
+  "input_verdict_by_bucket": {
+    "bugrc_patch_better": {
+      ">=0.99": {
+        "confirmed_bugrc_better": 8,
+        "reference_better": 1
+      },
+      "0.90-0.99": {
+        "confirmed_bugrc_better": 2189,
+        "not_enough_evidence": 1
+      },
+      "0.85-0.90": {
+        "confirmed_bugrc_better": 1
+      },
+      "0.80-0.85": {},
+      "0.70-0.80": {},
+      "<0.70": {}
+    },
+    "semantically_equivalent": {
+      ">=0.99": {},
+      "0.90-0.99": {
+        "confirmed_equivalent": 173,
+        "reference_better": 1,
+        "confirmed_bugrc_better": 4
+      },
+      "0.85-0.90": {},
+      "0.80-0.85": {},
+      "0.70-0.80": {},
+      "<0.70": {}
+    }
+  }
+}

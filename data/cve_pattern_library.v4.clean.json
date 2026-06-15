@@ -10,7 +10,7 @@
     "pattern_count": 84,
     "schema_version": "bugrc.cve_pattern_library.v3",
     "skipped_annotation_count": 693,
-    "source_dataset": "artifact://generated/cve_root_cause_dataset.v4.json",
+    "source_dataset": "data/cve_root_cause_dataset.v4.json.gz",
     "source_dataset_record_count": 2177,
     "source_dataset_schema": "bugrc.cve_root_cause_dataset.v4"
   },

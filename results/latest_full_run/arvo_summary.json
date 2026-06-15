@@ -1,0 +1,49 @@
+{
+  "record_count": 4993,
+  "status_distribution": {
+    "completed": 3660,
+    "failed": 1333
+  },
+  "patch_comparison_distribution": {
+    "semantic_judged": 3632,
+    "missing_official_patch": 28
+  },
+  "semantic_verdict_distribution": {
+    "bugrc_patch_better": 2184,
+    "official_patch_better": 1193,
+    "semantically_equivalent": 69,
+    "exact_match": 49,
+    "both_incomplete": 14,
+    "both_plausible": 8,
+    "unclear": 6,
+    "official_patch_limitation_unknown": 1
+  },
+  "generated_patch_is_pseudo_distribution": {
+    "False": 3206,
+    "None": 1407,
+    "True": 380
+  },
+  "project_count": 252,
+  "top_projects": {
+    "unknown": 1333,
+    "imagemagick": 276,
+    "skia": 147,
+    "ndpi": 142,
+    "harfbuzz": 137,
+    "opensc": 105,
+    "libxml2": 97,
+    "ffmpeg": 87,
+    "wireshark": 81,
+    "c-blosc2": 79,
+    "libredwg": 75,
+    "mruby": 72,
+    "gdal": 71,
+    "wolfssl": 69,
+    "php-src": 63,
+    "serenity": 63,
+    "gpac": 54,
+    "open62541": 53,
+    "libraw": 50,
+    "librawspeed": 48
+  }
+}

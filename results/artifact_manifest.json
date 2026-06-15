@@ -1,6 +1,7 @@
 {
   "schema_version": "bugrc.artifact_results_manifest.v1",
   "description": "Compact BugRC experiment results and priors for artifact review.",
+  "updated_for": "latest_full_run_20260614",
   "excluded": [
     "raw ARVO/Magma/CVE corpora",
     "cloned source repositories",
@@ -9,6 +10,11 @@
     "writing and figure artifacts"
   ],
   "files": [
+    {
+      "path": "results/README.md",
+      "bytes": 3337,
+      "sha256": "9735de3514b93a9438232ba716edd6512331a21477763b7b21ab604f01d8f6c4"
+    },
     {
       "path": "results/ablation/ablation_summary_table.json",
       "bytes": 8007,
@@ -45,14 +51,34 @@
       "sha256": "bb44b93d5de4cb8fb81971042acb4bb1c0a02aa5e62248e34c85ba90f03e21ab"
     },
     {
+      "path": "results/latest_full_run/arvo_summary.json",
+      "bytes": 1023,
+      "sha256": "3c957c5e7e427c392b0907b0ca4b95774981a5ce0c15d09648baa694d74e40ba"
+    },
+    {
+      "path": "results/latest_full_run/latest_full_run_20260614_final.json",
+      "bytes": 2218,
+      "sha256": "72dfda5d91023dfc6f17739f8799c8d2efec4fba16aa891d9473abf05aeb485e"
+    },
+    {
+      "path": "results/latest_full_run/magma_summary.json",
+      "bytes": 803,
+      "sha256": "5eac7ff89051fb8e733d8452d50fb9c70125f5cd41d494973e9ecd6736899325"
+    },
+    {
+      "path": "results/latest_full_run/second_pass_summary.json",
+      "bytes": 3062,
+      "sha256": "524d65ae4945139cbe4876a301e331022e3de64a079fa6517f15114bae670ea7"
+    },
+    {
       "path": "results/magma/full_138_results.jsonl.gz",
       "bytes": 397021,
       "sha256": "17d4cb56b67842377ff3d99b88410cd9accd069de2a804cb66b37db1c33fc5f1"
     },
     {
       "path": "results/magma/full_138_summary.json",
-      "bytes": 829,
-      "sha256": "48b5c425dfc36a89286664618e1f10d06f7c27b1bdac12e34b17026cf99d388a"
+      "bytes": 993,
+      "sha256": "db161e9259b51d1071c72f1e015d9b5f98020ecb706a16afd739d9e206bd78f7"
     },
     {
       "path": "results/priors/arvo_prior_summary.json",

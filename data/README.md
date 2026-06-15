@@ -19,6 +19,8 @@ weak priors for root-cause ranking.
   - Compressed CVE root-cause annotation dataset.
   - Contains 2,177 CVE-level records.
   - The uncompressed JSON has schema `bugrc.cve_root_cause_dataset.v4`.
+  - The current v4 build retains 5,285 root-cause annotations for pattern
+    construction after filtering low-quality or unknown-pattern records.
 
 ## Scope
 
@@ -27,6 +29,15 @@ analysis, heuristic root-cause mining, and LLM-assisted semantic validation.
 It is not a perfect hand-labeled ground truth corpus. BugRC uses it as weak
 supervision: patterns can boost candidates already recovered from the analyzed
 program, but they cannot create new source locations or dependency edges.
+
+Current compact counts:
+
+- CVE-level records: 2,177
+- Retained root-cause annotations used by the pattern builder: 5,285
+- Generalized patterns: 84
+- Top categories: validation/guard issues, incorrect size computations,
+  invalid state updates, invalid initialization, and ownership/lifetime
+  operations.
 
 ## Usage
 

@@ -7,11 +7,24 @@ materials.
 
 ## Contents
 
+- `latest_full_run/`
+  - Compact latest ARVO/Magma full-run summaries and independent second-pass
+    semantic audit summary.
+  - ARVO-Meta: 4,993 reports attempted, 3,660 completed analyses, 2,184
+    first-pass BugRC-preferred patch judgments, and 69 first-pass equivalent
+    judgments. The second-pass audit confirmed 2,182 BugRC-preferred ARVO cases
+    and 69 equivalent ARVO cases, with two ARVO cases rejected or unsupported.
+  - Magma: 138/138 completed; 114 cases matched reference repair semantics, 14
+    produced stronger source-level repairs, 9 were incomplete, and 1 remained
+    outside the claim taxonomy. BugRC matched or improved the reference repair
+    in 128/138 cases under this taxonomy.
+
 - `magma/`
-  - Full 138-case Magma run summary and compressed per-case JSONL results.
-  - Summary: 117 cases matched the reference repair, 14 cases produced a
-    stronger source-level repair under the artifact taxonomy, and 7 cases were
-    incomplete.
+  - Compact Magma summaries and compressed per-case JSONL result archive.
+  - `full_138_summary.json` mirrors the latest compact Magma full-run summary.
+  - `full_138_results.jsonl.gz` is a compressed earlier 138-case per-case run
+    archive retained for inspection; use `latest_full_run/` for the current
+    paper-level compact summary.
 
 - `ablation/`
   - Ablation table for Full BugRC, variants without causality chain,
@@ -34,9 +47,10 @@ materials.
     applicability assessment.
 
 - `arvo_high_confidence/`
-  - Compressed high-confidence ARVO semantic audit subset.
-  - Contains 267 records accepted at confidence >= 0.99 after semantic judging
-    and manual consistency review.
+  - Compressed earlier high-confidence ARVO semantic audit subset.
+  - Contains 267 records from a curated provenance-audit subset retained for
+    representative case inspection. The latest broad second-pass audit summary
+    is under `latest_full_run/`.
 
 - `priors/`
   - ARVO-derived project prior, ranker calibration, and prior summary files.
