@@ -1,0 +1,101 @@
+{
+  "base_build_failed_cases": [
+    "LUA001",
+    "LUA002",
+    "SQL006"
+  ],
+  "base_buildable_cases": 112,
+  "claim_distribution": {
+    "bugrc_blocks_better_than_magma_reference": 12,
+    "bugrc_incomplete": 7,
+    "bugrc_matches_ground_truth": 96
+  },
+  "compile_pass_cases": 95,
+  "compile_pass_rate_over_base_buildable": 0.8482,
+  "compile_pass_rate_over_materialized": 0.8261,
+  "final_conclusion_distribution": {
+    "base_and_bugrc_build": 74,
+    "base_and_bugrc_llm_refined_build": 14,
+    "base_and_bugrc_refined_build": 7,
+    "base_build_failed": 3,
+    "patch_compile_failed": 17
+  },
+  "record_count": 115,
+  "refinement_source_distribution": {
+    "conservative_v2": 7,
+    "llm_v3b": 10,
+    "llm_v4": 4,
+    "original": 77,
+    "unrescued": 17
+  },
+  "rescued_by_conservative_v2": [
+    "SND005",
+    "TIF005",
+    "TIF006",
+    "SSL003",
+    "PDF009",
+    "PDF012",
+    "PDF019"
+  ],
+  "rescued_by_llm_v3b": [
+    "PNG004",
+    "SND010",
+    "TIF003",
+    "TIF004",
+    "TIF008",
+    "XML004",
+    "XML007",
+    "XML013",
+    "PDF017",
+    "PDF021"
+  ],
+  "rescued_by_llm_v4": [
+    "SND016",
+    "XML002",
+    "XML009",
+    "SQL019"
+  ],
+  "source_files": {
+    "conservative_v2": "remote validation run: magma_compile_refined_failures_38_20260627_v2/compile_results.jsonl",
+    "llm_v3b": "remote validation run: magma_compile_llm_refined_failures_31_20260627_v3b/compile_results.jsonl",
+    "llm_v4": "remote validation run: magma_compile_llm_refined_failures_21_20260627_v4/compile_results.jsonl",
+    "original": "remote validation run: magma_compile_materialized_115_20260627_expanded_full/compile_results.jsonl"
+  },
+  "strict_bugrc_better_cases": 12,
+  "strict_bugrc_better_compile_pass_cases": 12,
+  "strict_bugrc_better_compile_pass_rate": 1.0,
+  "strict_bugrc_better_conclusion_distribution": {
+    "base_and_bugrc_build": 11,
+    "base_and_bugrc_llm_refined_build": 1
+  },
+  "target_distribution": {
+    "libpng": 5,
+    "libsndfile": 13,
+    "libtiff": 13,
+    "libxml2": 16,
+    "lua": 2,
+    "openssl": 17,
+    "php": 10,
+    "poppler": 21,
+    "sqlite3": 18
+  },
+  "unrescued_patch_compile_failed": [
+    "SND025",
+    "TIF012",
+    "XML001",
+    "XML008",
+    "SSL012",
+    "SSL017",
+    "SSL020",
+    "PHP003",
+    "PHP004",
+    "PHP006",
+    "PHP009",
+    "PHP010",
+    "PDF015",
+    "PDF020",
+    "SQL004",
+    "SQL005",
+    "SQL020"
+  ]
+}

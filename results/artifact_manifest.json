@@ -1,7 +1,5 @@
 {
-  "schema_version": "bugrc.artifact_results_manifest.v1",
   "description": "Compact BugRC experiment results and priors for artifact review.",
-  "updated_for": "latest_full_run_20260614",
   "excluded": [
     "raw ARVO/Magma/CVE corpora",
     "cloned source repositories",
@@ -11,154 +9,166 @@
   ],
   "files": [
     {
+      "bytes": 3729,
       "path": "results/README.md",
-      "bytes": 3337,
-      "sha256": "9735de3514b93a9438232ba716edd6512331a21477763b7b21ab604f01d8f6c4"
+      "sha256": "d44d2f33b397c92e1081e35495929b996142d23af80a272763ef4ebeac0479c5"
     },
     {
-      "path": "results/ablation/ablation_summary_table.json",
       "bytes": 8007,
+      "path": "results/ablation/ablation_summary_table.json",
       "sha256": "00ae3970e0e9cb20aea075b35fa40f0093884ae9c765a56e161c7fe8362b058d"
     },
     {
-      "path": "results/ablation/ablation_summary_table.md",
       "bytes": 1934,
+      "path": "results/ablation/ablation_summary_table.md",
       "sha256": "d0b4ca6e24142661fcfe6821570cc1c84f175940feb1b7ebdf8001e4cd709a23"
     },
     {
-      "path": "results/arvo_high_confidence/llm_judgments.accepted_099.json.gz",
       "bytes": 105761,
+      "path": "results/arvo_high_confidence/llm_judgments.accepted_099.json.gz",
       "sha256": "c48e8ac22ca669443de2f9d2fd2fce41e8cbe2d183b9259cf4c64426e43d82a4"
     },
     {
-      "path": "results/external_baselines/magma_subset/cpr_extractfix_applicability.json",
       "bytes": 10824,
+      "path": "results/external_baselines/magma_subset/cpr_extractfix_applicability.json",
       "sha256": "248e34a2f98053c6d53a6325141a4f331f2ad90e33e9d0f8563d5c60775badc2"
     },
     {
-      "path": "results/external_baselines/magma_subset/summary.json",
       "bytes": 5041,
+      "path": "results/external_baselines/magma_subset/summary.json",
       "sha256": "c8cc70aac77f567fe982dcdc1cfbfe0541a5b7ec24a5f4c0ef3343f9174bae34"
     },
     {
-      "path": "results/external_baselines/magma_subset/summary.md",
       "bytes": 1073,
+      "path": "results/external_baselines/magma_subset/summary.md",
       "sha256": "b51b3a1c4d6f512c136e687595b339910691175ab9cc611d666c0d4ed2c02095"
     },
     {
-      "path": "results/external_baselines/magma_subset/vulrepair_predictions.jsonl.gz",
       "bytes": 21188,
+      "path": "results/external_baselines/magma_subset/vulrepair_predictions.jsonl.gz",
       "sha256": "bb44b93d5de4cb8fb81971042acb4bb1c0a02aa5e62248e34c85ba90f03e21ab"
     },
     {
-      "path": "results/latest_full_run/arvo_summary.json",
       "bytes": 1023,
+      "path": "results/latest_full_run/arvo_summary.json",
       "sha256": "3c957c5e7e427c392b0907b0ca4b95774981a5ce0c15d09648baa694d74e40ba"
     },
     {
-      "path": "results/latest_full_run/latest_full_run_20260614_final.json",
       "bytes": 2218,
+      "path": "results/latest_full_run/latest_full_run_20260614_final.json",
       "sha256": "72dfda5d91023dfc6f17739f8799c8d2efec4fba16aa891d9473abf05aeb485e"
     },
     {
+      "bytes": 829,
       "path": "results/latest_full_run/magma_summary.json",
-      "bytes": 803,
-      "sha256": "5eac7ff89051fb8e733d8452d50fb9c70125f5cd41d494973e9ecd6736899325"
+      "sha256": "2daf6173344f4330995d6c0249c0f64984c32f3e179707c403e1dbadf4569e71"
     },
     {
-      "path": "results/latest_full_run/second_pass_summary.json",
       "bytes": 3062,
+      "path": "results/latest_full_run/second_pass_summary.json",
       "sha256": "524d65ae4945139cbe4876a301e331022e3de64a079fa6517f15114bae670ea7"
     },
     {
-      "path": "results/magma/full_138_results.jsonl.gz",
       "bytes": 397021,
+      "path": "results/magma/full_138_results.jsonl.gz",
       "sha256": "17d4cb56b67842377ff3d99b88410cd9accd069de2a804cb66b37db1c33fc5f1"
     },
     {
+      "bytes": 1038,
       "path": "results/magma/full_138_summary.json",
-      "bytes": 993,
-      "sha256": "db161e9259b51d1071c72f1e015d9b5f98020ecb706a16afd739d9e206bd78f7"
+      "sha256": "4bb06d3939d76c6653264bbae66aed4aff61184c4c7d94da35e708cc1e5ae131"
     },
     {
-      "path": "results/priors/arvo_prior_summary.json",
       "bytes": 493,
+      "path": "results/priors/arvo_prior_summary.json",
       "sha256": "ea6051ddd7825f809072b37bd7c8a7ac4fe3ede5329d4cc0275c4f09a7fe1b5e"
     },
     {
-      "path": "results/priors/arvo_project_prior.json",
       "bytes": 25598,
+      "path": "results/priors/arvo_project_prior.json",
       "sha256": "7118acbb5d838c31578f0f0eceb9a01847bec626850b7d7bdf48c4d8ba5cc065"
     },
     {
-      "path": "results/priors/arvo_ranker_calibration.json",
       "bytes": 901,
+      "path": "results/priors/arvo_ranker_calibration.json",
       "sha256": "7ebfe1caeb30d034c8c8fc84d3020365d789fac5b835d7fd95e4f2ec38d5c0a8"
     },
     {
-      "path": "results/validation/arvo_dynamic_feasible_next21/validation_results.jsonl.gz",
       "bytes": 75139,
+      "path": "results/validation/arvo_dynamic_feasible_next21/validation_results.jsonl.gz",
       "sha256": "0e97a52961014251d60c1d245b11adbfb8c7a675ccffe0683872ada818f6b41f"
     },
     {
-      "path": "results/validation/arvo_dynamic_feasible_next21/validation_summary.json",
       "bytes": 463,
+      "path": "results/validation/arvo_dynamic_feasible_next21/validation_summary.json",
       "sha256": "b81aee97e387db10a1906f4841b3d60bb37db49d7dd3ca1b3a72e186a94240e2"
     },
     {
-      "path": "results/validation/arvo_dynamic_top30/validation_results.jsonl.gz",
       "bytes": 61907,
+      "path": "results/validation/arvo_dynamic_top30/validation_results.jsonl.gz",
       "sha256": "3a73ff7c561742c282e3c28b6c72ad5f8a5b8396f5dd947879a6973288f86a36"
     },
     {
-      "path": "results/validation/arvo_dynamic_top30/validation_summary.json",
       "bytes": 449,
+      "path": "results/validation/arvo_dynamic_top30/validation_summary.json",
       "sha256": "ac6310891cae77c6341cc959ac312cbcd8b6881a27869b225140ed2e29551e49"
     },
     {
-      "path": "results/validation/magma_compile_core_12/compile_results.jsonl.gz",
       "bytes": 20054,
+      "path": "results/validation/magma_compile_core_12/compile_results.jsonl.gz",
       "sha256": "3f6ea68a9e5a0bdb3ce685600ab5544819575c416acc7d1cc56047a2206d050e"
     },
     {
-      "path": "results/validation/magma_compile_core_12/compile_summary.json",
       "bytes": 528,
+      "path": "results/validation/magma_compile_core_12/compile_summary.json",
       "sha256": "571794209a10173d493025e9dad0d735309dce558518a55ee3f41f63c837d3a4"
     },
     {
-      "path": "results/validation/magma_compile_core_12/selected_cases.json",
       "bytes": 4758,
+      "path": "results/validation/magma_compile_core_12/selected_cases.json",
       "sha256": "7386ed8603ff41cf9f56f97f9534a073bec4305ab258eb95060d7a45a2f5c004"
     },
     {
-      "path": "results/validation/magma_patch_applicability_full/validation_results.jsonl.gz",
+      "bytes": 2381,
+      "path": "results/validation/magma_compile_materialized_115_refined/compile_summary.json",
+      "sha256": "313500673cabab3b5e1ea0177d2bbd350135b4605462b8391afc3dc12070224c"
+    },
+    {
+      "bytes": 835,
+      "path": "results/validation/magma_compile_materialized_115_refined/llm_v4_remaining_summary.json",
+      "sha256": "f6df69244b554732e54205c0b0af5c52d79f1cd302b29d9f66453e0875ba98d7"
+    },
+    {
       "bytes": 5320,
+      "path": "results/validation/magma_patch_applicability_full/validation_results.jsonl.gz",
       "sha256": "16b5b464e3ab9d1dfe22bddb568e2dc9effcd2fb1afd93ceac84c8610170838a"
     },
     {
-      "path": "results/validation/magma_patch_applicability_full/validation_summary.json",
       "bytes": 6471,
+      "path": "results/validation/magma_patch_applicability_full/validation_summary.json",
       "sha256": "fd6ee10b11cf3dfb15c3b7995de145be5817a6b4a5dad884da4747ace06bd744"
     },
     {
-      "path": "results/validation/magma_patch_applicability_refined_full/validation_results.jsonl.gz",
       "bytes": 10541,
+      "path": "results/validation/magma_patch_applicability_refined_full/validation_results.jsonl.gz",
       "sha256": "dbb8135c0a236b8cda215bff7c534d1640458d46e8d73c009395b6961f520145"
     },
     {
-      "path": "results/validation/magma_patch_applicability_refined_full/validation_summary.json",
       "bytes": 6629,
+      "path": "results/validation/magma_patch_applicability_refined_full/validation_summary.json",
       "sha256": "1a1f116346e118b031902fe0cbdfe228291491c508b9fad812b9be9924c30cb5"
     },
     {
-      "path": "results/validation/oss_fuzz_projects.json",
       "bytes": 20971,
+      "path": "results/validation/oss_fuzz_projects.json",
       "sha256": "4fa0bdafc35c863b90d2cb36fdde2fc458d48c5ce61d02cbed74f591e9ff82e7"
     },
     {
-      "path": "results/validation/oss_fuzz_projects.txt",
       "bytes": 12167,
+      "path": "results/validation/oss_fuzz_projects.txt",
       "sha256": "cf3785fbaa64a06cc98265c480ec26c7464a41f32d63e95bb999b57e465325d5"
     }
-  ]
+  ],
+  "schema_version": "bugrc.artifact_results_manifest.v1",
+  "updated_for": "magma_compile_validation_20260627_v4"
 }

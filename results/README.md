@@ -14,10 +14,11 @@ materials.
     first-pass BugRC-preferred patch judgments, and 69 first-pass equivalent
     judgments. The second-pass audit confirmed 2,182 BugRC-preferred ARVO cases
     and 69 equivalent ARVO cases, with two ARVO cases rejected or unsupported.
-  - Magma: 138/138 completed; 114 cases matched reference repair semantics, 14
-    produced stronger source-level repairs, 9 were incomplete, and 1 remained
-    outside the claim taxonomy. BugRC matched or improved the reference repair
-    in 128/138 cases under this taxonomy.
+  - Magma: 138/138 completed; 104 cases matched reference repair semantics, 20
+    produced stronger source-level repairs, 13 were incomplete or reference-
+    better, and 1 remained outside the claim taxonomy. BugRC matched or
+    improved the reference repair in 124/138 cases, about 90%, under this
+    taxonomy.
 
 - `magma/`
   - Compact Magma summaries and compressed per-case JSONL result archive.
@@ -38,8 +39,13 @@ materials.
     summaries.
   - Refined Magma patch materialization applied 115 of 138 generated patches,
     with 113 passing `diff --check`.
-  - In the selected 12-case Magma compile set, all base versions compiled and
-    11 BugRC-patched versions compiled.
+  - Among 115 materialized Magma patches, 112 had buildable unpatched baselines
+    and 95 BugRC-patched versions compiled after compile-guided refinement. In
+    the selected 12-case Magma core-claim set, all base versions and all 12
+    BugRC-patched versions compiled.
+  - `magma_compile_materialized_115_refined/` contains the latest compact
+    compile-validation summary. Earlier compile-validation subdirectories are
+    retained as archived intermediate evidence.
 
 - `external_baselines/`
   - Small Magma-subset compatibility/effectiveness artifacts for external AVR

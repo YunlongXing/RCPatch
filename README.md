@@ -45,14 +45,16 @@ large and should be obtained from their original sources.
   equivalent cases. A second-pass audit confirmed 2,182 BugRC-preferred cases
   and 69 equivalent cases, with only two ARVO cases rejected or unsupported.
 - **Magma:** On all 138 Magma vulnerabilities, BugRC matched the reference
-  repair semantics in 114 cases, produced a stronger source-level repair in 14
-  cases, and was incomplete in 9 cases; one case remained outside the claim
-  taxonomy. BugRC therefore matched or improved the reference repair in 128 of
-  138 cases under the evaluation taxonomy.
+  repair semantics in 104 cases, produced a stronger source-level repair in 20
+  cases, was incomplete or reference-worse in 13 cases, and left one case
+  outside the claim taxonomy. BugRC therefore matched or improved the reference
+  repair in 124 of 138 cases, about 90%, under the evaluation taxonomy.
 - **Patch materialization:** After refinement, 115 of 138 generated Magma diffs
   were applicable source patches; 113 passed `diff --check`.
-- **Compile validation:** In a selected 12-case Magma core set, all baseline
-  versions compiled and 11 BugRC-patched versions compiled.
+- **Compile validation:** Among the 115 materialized Magma patches, 112 had
+  buildable unpatched baselines and 95 BugRC-patched versions compiled after
+  compile-guided refinement. In the 12-case Magma core-claim set, all baseline
+  versions and all 12 BugRC-patched versions compiled.
 - **Ablation:** Removing the causality chain reduced performance, while a
   trigger-site patch baseline dropped to 65.2% on Magma, supporting the value
   of root-cause-to-trigger reasoning.

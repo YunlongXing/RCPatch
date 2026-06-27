@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Run small-scale external AVR baseline checks on Magma cases.
+"""Run external AVR baseline checks on Magma cases.
 
 This script intentionally keeps the baseline layer separate from BugRC's main
-pipeline.  It prepares a representative Magma subset, adapts each case into a
-function-level input for VulRepair, and records whether CPR/ExtractFix can be
-applied with the artifacts available for each case.
+pipeline.  It prepares either a representative Magma subset or the full Magma
+case set, adapts each case into a function-level input for VulRepair, and
+records whether CPR/ExtractFix can be applied with the artifacts available for
+each case.
 
 The CPR/ExtractFix path is compatibility-aware: those tools require inputs such
 as a crashing input/exploit, KLEE-compatible bitcode, fault locations, and repair
@@ -122,6 +123,14 @@ def select_subset(rows: list[dict[str, Any]], sample_size: int, per_target: int)
                 break
 
     return [row_to_case(row) for row in selected[:sample_size]]
+
+
+def select_all_completed(rows: list[dict[str, Any]]) -> list[BaselineCase]:
+    """Select all completed Magma cases in a stable target/bug order."""
+
+    completed = [row for row in rows if row.get("status") == "completed"]
+    completed.sort(key=lambda item: (str(item.get("target") or ""), str(item.get("bug_id") or item.get("local_id") or "")))
+    return [row_to_case(row) for row in completed]
 
 
 def line_start_offsets(text: str) -> list[int]:
@@ -553,8 +562,25 @@ def assess_cpr_extractfix(cases: list[BaselineCase], output_dir: Path, pull_cpr:
     return summary
 
 
-def write_summary(output_dir: Path, prepared: list[dict[str, Any]], vulrepair: dict[str, Any], cpr: dict[str, Any]) -> None:
+def write_summary(
+    output_dir: Path,
+    prepared: list[dict[str, Any]],
+    vulrepair: dict[str, Any],
+    cpr: dict[str, Any],
+    *,
+    selection_mode: str,
+) -> None:
     extracted = sum(1 for record in prepared if (record.get("vulrepair_input") or {}).get("status") == "extracted")
+    extraction_distribution: dict[str, int] = {}
+    target_distribution: dict[str, int] = {}
+    claim_distribution: dict[str, int] = {}
+    for record in prepared:
+        extraction_status = str((record.get("vulrepair_input") or {}).get("status") or "unknown")
+        extraction_distribution[extraction_status] = extraction_distribution.get(extraction_status, 0) + 1
+        target = str(record.get("target") or "unknown")
+        target_distribution[target] = target_distribution.get(target, 0) + 1
+        claim = str(record.get("bugrc_paper_claim") or "unknown")
+        claim_distribution[claim] = claim_distribution.get(claim, 0) + 1
     vulrepair_prediction_quality: dict[str, Any] = {}
     predictions_path = output_dir / "vulrepair_predictions.jsonl"
     if predictions_path.exists():
@@ -587,8 +613,13 @@ def write_summary(output_dir: Path, prepared: list[dict[str, Any]], vulrepair: d
             ),
         }
     summary = {
+        "selection_mode": selection_mode,
+        "case_count": len(prepared),
         "subset_size": len(prepared),
+        "target_distribution": target_distribution,
+        "bugrc_paper_claim_distribution": claim_distribution,
         "vulrepair_function_inputs": extracted,
+        "vulrepair_input_extraction_distribution": extraction_distribution,
         "vulrepair": vulrepair,
         "vulrepair_prediction_quality": vulrepair_prediction_quality,
         "cpr_extractfix": {
@@ -606,9 +637,10 @@ def write_summary(output_dir: Path, prepared: list[dict[str, Any]], vulrepair: d
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     lines = [
-        "# Magma External Baseline Subset",
+        "# Magma External Baseline Run",
         "",
-        f"- Subset size: {len(prepared)}",
+        f"- Selection mode: {selection_mode}",
+        f"- Case count: {len(prepared)}",
         f"- VulRepair function-level inputs extracted: {extracted}/{len(prepared)}",
         f"- VulRepair status: {vulrepair.get('status')}",
         f"- VulRepair predictions: {vulrepair_prediction_quality or 'not available'}",
@@ -627,6 +659,7 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--magma-results", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--all-cases", action="store_true", help="Use all completed Magma cases instead of a balanced subset.")
     parser.add_argument("--sample-size", type=int, default=18)
     parser.add_argument("--per-target", type=int, default=2)
     parser.add_argument("--python", default=sys.executable)
@@ -648,12 +681,17 @@ def main(argv: Iterable[str] | None = None) -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     rows = read_jsonl(args.magma_results)
-    cases = select_subset(rows, sample_size=args.sample_size, per_target=args.per_target)
-    LOG.info("Selected %d cases", len(cases))
+    if args.all_cases:
+        cases = select_all_completed(rows)
+        selection_mode = "all_completed"
+    else:
+        cases = select_subset(rows, sample_size=args.sample_size, per_target=args.per_target)
+        selection_mode = f"balanced_subset_{args.sample_size}"
+    LOG.info("Selected %d cases (%s)", len(cases), selection_mode)
     prepared = write_subset_outputs(cases, args.output_dir)
     vulrepair_status = run_vulrepair_if_requested(args, args.output_dir)
     cpr_status = assess_cpr_extractfix(cases, args.output_dir, pull_cpr=args.pull_cpr_docker)
-    write_summary(args.output_dir, prepared, vulrepair_status, cpr_status)
+    write_summary(args.output_dir, prepared, vulrepair_status, cpr_status, selection_mode=selection_mode)
     LOG.info("Wrote summary to %s", args.output_dir / "summary.json")
     return 0
 

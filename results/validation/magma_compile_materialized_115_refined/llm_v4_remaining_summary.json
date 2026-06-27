@@ -1,0 +1,41 @@
+{
+  "base_build_returncodes": {
+    "0": 21
+  },
+  "bugrc_build_returncodes": {
+    "2": 21
+  },
+  "compile_refinement_changed_distribution": {
+    "False": 21
+  },
+  "conclusion_distribution": {
+    "base_and_bugrc_llm_refined_build": 4,
+    "patch_compile_failed": 17
+  },
+  "paper_claim_distribution": {
+    "bugrc_incomplete": 2,
+    "bugrc_matches_ground_truth": 19
+  },
+  "patch_apply_distribution": {
+    "True": 21
+  },
+  "record_count": 21,
+  "semantic_verdict_distribution": {
+    "both_plausible": 1,
+    "magma_reference_better": 3,
+    "semantically_equivalent": 17
+  },
+  "status_distribution": {
+    "completed": 21
+  },
+  "target_distribution": {
+    "libsndfile": 2,
+    "libtiff": 1,
+    "libxml2": 4,
+    "openssl": 3,
+    "php": 5,
+    "poppler": 2,
+    "sqlite3": 4
+  },
+  "updated_at_epoch": 1782586298.3500707
+}

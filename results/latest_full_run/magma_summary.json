@@ -1,37 +1,21 @@
 {
+  "claim_level_outcomes": {
+    "bugrc_blocks_better_than_magma_reference": 20,
+    "bugrc_incomplete_or_reference_better": 13,
+    "bugrc_matches_ground_truth": 104,
+    "outside_claim_taxonomy_or_ambiguous": 1
+  },
+  "matches_or_improves": 124,
+  "matches_or_improves_rate": 0.8986,
+  "note": "Latest paper-level Magma claim taxonomy: 104 equivalent/matching repairs, 20 BugRC-preferred repairs, 13 incomplete/reference-better cases, and 1 ambiguous/outside-taxonomy case. BugRC matches or improves the reference repair in 124/138 cases (~90%).",
+  "paper_claim_distribution": {
+    "bugrc_blocks_better_than_magma_reference": 20,
+    "bugrc_incomplete": 13,
+    "bugrc_matches_ground_truth": 104,
+    "outside_claim_taxonomy_or_ambiguous": 1
+  },
   "record_count": 138,
   "status_distribution": {
     "completed": 138
-  },
-  "target_distribution": {
-    "libpng": 7,
-    "libsndfile": 18,
-    "libtiff": 14,
-    "libxml2": 17,
-    "lua": 4,
-    "openssl": 20,
-    "php": 16,
-    "poppler": 22,
-    "sqlite3": 20
-  },
-  "patch_comparison_distribution": {
-    "semantic_judged": 138
-  },
-  "semantic_verdict_distribution": {
-    "bugrc_patch_better": 16,
-    "semantically_equivalent": 109,
-    "magma_reference_better": 10,
-    "both_plausible": 2
-  },
-  "paper_claim_distribution": {
-    "bugrc_matches_ground_truth": 114,
-    "bugrc_blocks_better_than_magma_reference": 14,
-    "bugrc_incomplete": 9
-  },
-  "generated_patch_is_pseudo_distribution": {
-    "False": 118,
-    "True": 15,
-    "None": 5
-  },
-  "updated_at_epoch": 1781485120.9092443
+  }
 }
