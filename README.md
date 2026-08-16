@@ -294,19 +294,3 @@ Run a targeted test:
 ```bash
 PYTHONPATH=src python3 -m unittest tests.test_expert_rca_prior
 ```
-
-## Limitations
-
-BugRC is intentionally approximate:
-
-- C/C++ is the primary target.
-- Alias and heap-object tracking are heuristic.
-- Interprocedural reasoning is bounded and approximate.
-- Parser fallback behavior may over-approximate.
-- Ranking weights are manually tuned or weakly calibrated.
-- LLM output is advisory and evidence-bounded, never a replacement for extracted
-  source evidence.
-
-## License
-
-See [LICENSE](LICENSE).
