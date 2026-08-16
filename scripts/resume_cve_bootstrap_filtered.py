@@ -23,10 +23,10 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.cve_mining import CVEPatchExtractor  # noqa: E402
-from bugrc.errors import BugRCError, ModelSerializationError, ModelValidationError  # noqa: E402
-from bugrc.logging_utils import configure_logging, get_logger  # noqa: E402
-from bugrc.models import CollectedCVERecord  # noqa: E402
+from rcpatch.cve_mining import CVEPatchExtractor  # noqa: E402
+from rcpatch.errors import RCPatchError, ModelSerializationError, ModelValidationError  # noqa: E402
+from rcpatch.logging_utils import configure_logging, get_logger  # noqa: E402
+from rcpatch.models import CollectedCVERecord  # noqa: E402
 
 
 BOOTSTRAP_SCRIPT = PROJECT_ROOT / "scripts" / "bootstrap_cve_corpus.py"
@@ -374,7 +374,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         if not args.skip_build:
             print(f"Pipeline output: {pipeline_dir}")
         return 0
-    except (BugRCError, ModelSerializationError, ModelValidationError) as exc:
+    except (RCPatchError, ModelSerializationError, ModelValidationError) as exc:
         logger.error("%s", exc)
         return 1
     except Exception as exc:  # pragma: no cover - defensive path

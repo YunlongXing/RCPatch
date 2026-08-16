@@ -30,13 +30,13 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.llm import FileLLMCache, LLMClient, LLMRequest, OpenAICompatibleProvider  # noqa: E402
-from bugrc.logging_utils import configure_logging, get_logger  # noqa: E402
-from bugrc.models import CollectedCVERecord, Language  # noqa: E402
+from rcpatch.llm import FileLLMCache, LLMClient, LLMRequest, OpenAICompatibleProvider  # noqa: E402
+from rcpatch.logging_utils import configure_logging, get_logger  # noqa: E402
+from rcpatch.models import CollectedCVERecord, Language  # noqa: E402
 
 
-SCHEMA_VERSION_DATASET = "bugrc.cve_semantic_root_cause_dataset.v1"
-SCHEMA_VERSION_PATTERNS = "bugrc.cve_pattern_prior_library.v1"
+SCHEMA_VERSION_DATASET = "rcpatch.cve_semantic_root_cause_dataset.v1"
+SCHEMA_VERSION_PATTERNS = "rcpatch.cve_pattern_prior_library.v1"
 PROMPT_VERSION = "cve-semantic-pattern-v1"
 
 MEMORY_CWES = {
@@ -89,10 +89,10 @@ def build_parser() -> argparse.ArgumentParser:
         dest="enable_llm",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="Use an OpenAI-compatible LLM when BUGRC_OPENAI_API_KEY or OPENAI_API_KEY is configured.",
+        help="Use an OpenAI-compatible LLM when RCPATCH_OPENAI_API_KEY, BUGRC_OPENAI_API_KEY, or OPENAI_API_KEY is configured.",
     )
     parser.add_argument("--require-llm", action="store_true", help="Fail if --llm is enabled but no provider is available.")
-    parser.add_argument("--llm-model", default=os.getenv("BUGRC_LLM_MODEL", "gpt-4.1-mini"), help="OpenAI-compatible model.")
+    parser.add_argument("--llm-model", default=os.getenv("RCPATCH_LLM_MODEL", os.getenv("BUGRC_LLM_MODEL", "gpt-4.1-mini")), help="OpenAI-compatible model.")
     parser.add_argument("--llm-base-url", default="https://api.openai.com/v1", help="OpenAI-compatible base URL.")
     parser.add_argument("--llm-cache-dir", help="Directory for LLM response cache.")
     parser.add_argument("--llm-timeout-seconds", type=float, default=45.0, help="Per-request LLM timeout.")
@@ -200,7 +200,7 @@ def iter_collection_records(path: Path) -> Iterable[CollectedCVERecord]:
     """Stream records from a pretty-printed bootstrap collection result.
 
     The bootstrap output can be multiple gigabytes, so this avoids loading the
-    whole JSON document into memory. It expects the standard BugRC layout:
+    whole JSON document into memory. It expects the standard RCPatch layout:
     {"record_count": ..., "records": [ ... ]}.
     """
 
@@ -347,7 +347,7 @@ def build_llm_request(record: CollectedCVERecord, heuristic: dict[str, Any]) -> 
         },
     }
     system_prompt = (
-        "You classify CVE descriptions into semantic root-cause hypotheses for BugRC. "
+        "You classify CVE descriptions into semantic root-cause hypotheses for RCPatch. "
         "Use only the provided CVE text, CWE, project, and reference metadata. "
         "Do not invent source files, functions, line numbers, patches, or candidates. "
         "Return only valid JSON."
@@ -425,7 +425,7 @@ def decision(bug_class: str, root_cause_type: str, pattern: str, text: str, conf
 
 def heuristic_reasoning(bug_class: str, root_cause_type: str, pattern: str) -> str:
     return (
-        f"The CVE text/CWE indicates {bug_class}; BugRC treats the likely semantic root cause as "
+        f"The CVE text/CWE indicates {bug_class}; RCPatch treats the likely semantic root cause as "
         f"{root_cause_type}, represented by pattern {pattern}. This is a text-only hypothesis."
     )
 
@@ -555,7 +555,7 @@ def write_outputs(
             "limitations": [
                 "Text-only semantic hypotheses; no source checkout, patch alignment, slicing, or line-level validation.",
                 "Root-cause locations are intentionally omitted because they require code evidence.",
-                "Use this as a BugRC ranking prior or triage dataset, not as ground-truth source annotations.",
+                "Use this as a RCPatch ranking prior or triage dataset, not as ground-truth source annotations.",
             ],
         },
         "records": annotations,
@@ -626,7 +626,7 @@ def build_pattern_library(annotations: list[dict[str, Any]], *, min_support: int
             "annotation_count": len(annotations),
             "min_support": min_support,
             "limitations": [
-                "Patterns are mined from CVE text semantics and require source-level BugRC validation before use as evidence.",
+                "Patterns are mined from CVE text semantics and require source-level RCPatch validation before use as evidence.",
             ],
         },
         "patterns": patterns,

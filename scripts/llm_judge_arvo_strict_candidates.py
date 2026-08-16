@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LLM second-pass judge for high-quality ARVO BugRC-better candidates."""
+"""LLM second-pass judge for high-quality ARVO RCPatch-better candidates."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_MODEL = os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini")
+DEFAULT_MODEL = os.getenv("RCPATCH_LLM_VALIDATION_MODEL", os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini"))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -23,7 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--suspicious-json", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--base-url", default=os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
+    parser.add_argument("--base-url", default=os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")))
     parser.add_argument("--min-input-confidence", type=float, default=0.95)
     parser.add_argument("--accept-threshold", type=float, default=0.99)
     parser.add_argument("--limit", type=int, default=None)
@@ -36,9 +36,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     logging.basicConfig(level=getattr(logging, args.log_level.upper()), format="%(asctime)s %(levelname)s %(message)s")
-    api_key = os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("RCPATCH_OPENAI_API_KEY") or os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key:
-        logging.error("BUGRC_OPENAI_API_KEY or OPENAI_API_KEY must be set")
+        logging.error("RCPATCH_OPENAI_API_KEY, BUGRC_OPENAI_API_KEY, or OPENAI_API_KEY must be set")
         return 2
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -191,7 +191,7 @@ def judge_case(
                 "You are a strict static-analysis judge for root-cause patch quality. "
                 "You must evaluate only the supplied evidence. Do not assume reproducer results. "
                 "Give confidence >= 0.99 only when the evidence is overwhelming: the official patch is clearly unrelated "
-                "or fails to address the trigger/root cause, and the BugRC patch directly blocks the root cause described "
+                "or fails to address the trigger/root cause, and the RCPatch patch directly blocks the root cause described "
                 "by the trigger and causality chain with low semantic risk. If there is any meaningful uncertainty, use "
                 "0.95 or lower. Return JSON only."
             ),
@@ -199,7 +199,7 @@ def judge_case(
         {
             "role": "user",
             "content": (
-                "Judge whether this case should be retained as an ultra-high-confidence example where BugRC's generated "
+                "Judge whether this case should be retained as an ultra-high-confidence example where RCPatch's generated "
                 "patch is semantically better than the official patch, without using compiler or reproducer evidence.\n\n"
                 "Return a JSON object with exactly these keys:\n"
                 "{\n"

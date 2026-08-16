@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build BugRC ranker calibration and project priors from curated ARVO results."""
+"""Build RCPatch ranker calibration and project priors from curated ARVO results."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def main(argv: list[str] | None = None) -> int:
 
     ranker_calibration = {
         "metadata": {
-            "source": "ARVO curated BugRC-better cases",
+            "source": "ARVO curated RCPatch-better cases",
             "record_count": len(records),
             "purpose": "Weakly calibrate ranking toward patterns repeatedly accepted by strict semantic review.",
         },

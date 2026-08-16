@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a refinement plan from LLM-validated BugRC CVE outputs.
+"""Build a refinement plan from LLM-validated RCPatch CVE outputs.
 
 This script does not call an LLM. It consumes the LLM validation JSONL files and
 turns "partially_correct" judgments into concrete follow-up actions for source
@@ -213,7 +213,7 @@ def build_refinement_plan(
     ]
 
     return {
-        "schema_version": "bugrc.llm_guided_refinement_plan.v1",
+        "schema_version": "rcpatch.llm_guided_refinement_plan.v1",
         "cve_id": cve_id,
         "project": record.get("project") or cve_metadata.get("project"),
         "repo_url": record.get("repo_url") or cve_metadata.get("repo_url"),
@@ -429,7 +429,7 @@ def refinement_instructions(action: str) -> list[str]:
             "Require a concrete invariant violation before labeling the new candidate as root cause.",
         ],
         "specialize_root_cause_pattern": [
-            "Map broad BugRC patterns to a CVE-specific subtype from the LLM bug-class hint.",
+            "Map broad RCPatch patterns to a CVE-specific subtype from the LLM bug-class hint.",
             "Separate size-calculation, bounds-check, lifetime, state-transition, and validation failures.",
             "Do not keep generic 'none' or overly broad pattern labels unless code evidence is strong.",
         ],
@@ -494,7 +494,7 @@ def load_pattern_validation_index(path: Path) -> dict[str, dict[str, Any]]:
 
 def build_summary(plans: list[dict[str, Any]], targets: list[dict[str, Any]], *, target_label: str = DEFAULT_TARGET_LABEL) -> dict[str, Any]:
     return {
-        "schema_version": "bugrc.llm_guided_refinement_plan.v1",
+        "schema_version": "rcpatch.llm_guided_refinement_plan.v1",
         "target_label": target_label,
         "partial_record_count": len(plans),
         "target_count": len(targets),

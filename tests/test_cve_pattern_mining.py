@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import unittest
 
-from bugrc.cve_mining import RootCausePatternMiner
-from bugrc.models import (
+from rcpatch.cve_mining import RootCausePatternMiner
+from rcpatch.models import (
     BackwardSlice,
     CVERootCauseAnnotation,
     CVERootCauseDataset,

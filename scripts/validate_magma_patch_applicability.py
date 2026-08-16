@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Validate whether BugRC-generated Magma patches materialize on source trees.
+"""Validate whether RCPatch-generated Magma patches materialize on source trees.
 
 This script is intentionally lighter than dynamic reproducer validation.  It
 does not build Magma targets; instead it creates a clean detached worktree from
-each recorded pre-fix Magma worktree and checks whether BugRC's generated
+each recorded pre-fix Magma worktree and checks whether RCPatch's generated
 unified diff can be applied there.  The output is useful as a paper-facing
 sanity check: a semantic patch judgment is much stronger when the patch also
 materializes against the buggy source revision.
@@ -24,7 +24,7 @@ from typing import Any
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--results-jsonl", required=True, type=Path, help="Magma BugRC results.jsonl.")
+    parser.add_argument("--results-jsonl", required=True, type=Path, help="Magma RCPatch results.jsonl.")
     parser.add_argument("--output-dir", required=True, type=Path, help="Output directory for validation artifacts.")
     parser.add_argument("--max-targets", type=int, default=None, help="Optional maximum number of records to check.")
     parser.add_argument("--start-index", type=int, default=0, help="Start index into completed records.")

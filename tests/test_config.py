@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.config import build_analysis_config_overrides, load_bug_spec_payload
+from rcpatch.config import build_analysis_config_overrides, load_bug_spec_payload
 
 
 class ConfigHelpersTests(unittest.TestCase):

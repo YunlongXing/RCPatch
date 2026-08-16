@@ -115,10 +115,10 @@ def build_case(record: dict[str, Any], meta_dir: Path, patch_dir: Path) -> dict[
         "crash_type": record.get("crash_type"),
         "severity": record.get("severity"),
         "crash_state": record.get("crash_state") or [],
-        "trigger": bugrc.get("trigger"),
+        "trigger": rcpatch.get("trigger"),
         "llm_initial_root_cause": ((record.get("llm_initial_root_cause") or {}).get("payload") or {}),
-        "bugrc_candidates": bugrc.get("candidates") or [],
-        "bugrc_chains": bugrc.get("chains") or [],
+        "bugrc_candidates": rcpatch.get("candidates") or [],
+        "bugrc_chains": rcpatch.get("chains") or [],
         "generated_patch": generated_patch,
         "generated_patch_files": patch_files_from_unified_diff(generated_diff),
         "official_patch_path": official_patch_path.as_posix(),
@@ -180,7 +180,7 @@ def render_markdown(cases: list[dict[str, Any]], *, include_full_diffs: bool) ->
         "",
         "## Summary",
         "",
-        "| ID | Project | Verdict | Confidence | Crash | Trigger | Official patch | BugRC patch | Chain |",
+        "| ID | Project | Verdict | Confidence | Crash | Trigger | Official patch | RCPatch patch | Chain |",
         "|---|---|---|---:|---|---|---|---|---|",
     ]
     for case in cases:
@@ -221,12 +221,12 @@ def render_case(case: dict[str, Any], *, include_full_diffs: bool) -> list[str]:
         f"- Likely pattern: {initial.get('likely_bug_pattern') or 'N/A'}",
         f"- Patch strategy: {initial.get('patch_strategy') or 'N/A'}",
         "",
-        "### BugRC Evidence",
+        "### RCPatch Evidence",
         "",
     ]
     candidates = case.get("bugrc_candidates") or []
     if not candidates:
-        lines.append("No source-based BugRC candidate was produced.")
+        lines.append("No source-based RCPatch candidate was produced.")
     for candidate in candidates[:5]:
         location = candidate.get("location") or {}
         lines.append(
@@ -254,7 +254,7 @@ def render_case(case: dict[str, Any], *, include_full_diffs: bool) -> list[str]:
             "",
             "### Comparison Reasoning",
             "",
-            f"- BugRC cuts bug: `{comparison.get('bugrc_patch_cuts_bug')}`",
+            f"- RCPatch cuts bug: `{comparison.get('bugrc_patch_cuts_bug')}`",
             f"- Official cuts bug: `{comparison.get('official_patch_cuts_bug')}`",
             f"- Semantic similarity: `{comparison.get('semantic_similarity')}`",
             f"- Reasoning: {comparison.get('reasoning') or ''}",
@@ -264,13 +264,13 @@ def render_case(case: dict[str, Any], *, include_full_diffs: bool) -> list[str]:
             "",
             f"- Official subject: {case.get('official_patch_subject') or 'N/A'}",
             f"- Official files: `{', '.join(case.get('official_patch_files') or []) or 'N/A'}`",
-            f"- BugRC files: `{', '.join(case.get('generated_patch_files') or []) or 'N/A'}`",
-            f"- BugRC rationale: {generated.get('patch_rationale') or 'N/A'}",
+            f"- RCPatch files: `{', '.join(case.get('generated_patch_files') or []) or 'N/A'}`",
+            f"- RCPatch rationale: {generated.get('patch_rationale') or 'N/A'}",
             "",
         ]
     )
     if include_full_diffs:
-        lines.extend(["#### BugRC Generated Patch", "", fence(generated.get("unified_diff") or "", "diff"), ""])
+        lines.extend(["#### RCPatch Generated Patch", "", fence(generated.get("unified_diff") or "", "diff"), ""])
         lines.extend(["#### Official Patch", "", fence(case.get("official_patch") or "", "diff"), ""])
     return lines
 

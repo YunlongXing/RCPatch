@@ -6,10 +6,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.cli import main as bugrc_cli_main
-from bugrc.models import ParserBackend
-from bugrc.source import SourceProjectParser
-from bugrc.validation import PatchValidationHarness, ValidationCommand
+from rcpatch.cli import main as bugrc_cli_main
+from rcpatch.models import ParserBackend
+from rcpatch.source import SourceProjectParser
+from rcpatch.validation import PatchValidationHarness, ValidationCommand
 
 
 SAMPLE_SOURCE = """\

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare ARVO full-run manifests for the enhanced BugRC evaluator."""
+"""Prepare ARVO full-run manifests for the enhanced RCPatch evaluator."""
 
 from __future__ import annotations
 

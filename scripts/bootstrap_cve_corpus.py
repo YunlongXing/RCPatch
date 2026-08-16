@@ -30,16 +30,16 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.cve_mining import CVECollectionService, CVEPatchExtractor, CollectionSource  # noqa: E402
-from bugrc.errors import BugRCError, ModelSerializationError  # noqa: E402
-from bugrc.logging_utils import configure_logging, get_logger  # noqa: E402
-from bugrc.models import AdvisoryReference, AdvisorySourceKind, CollectedCVERecord, Language  # noqa: E402
+from rcpatch.cve_mining import CVECollectionService, CVEPatchExtractor, CollectionSource  # noqa: E402
+from rcpatch.errors import RCPatchError, ModelSerializationError  # noqa: E402
+from rcpatch.logging_utils import configure_logging, get_logger  # noqa: E402
+from rcpatch.models import AdvisoryReference, AdvisorySourceKind, CollectedCVERecord, Language  # noqa: E402
 
 
 CVELIST_V5_REPO_URL = "https://github.com/CVEProject/cvelistV5.git"
 NVD_CVE_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 GHSA_API_URL = "https://api.github.com/advisories"
-DEFAULT_USER_AGENT = "BugRC-CVE-Bootstrap/1.0"
+DEFAULT_USER_AGENT = "RCPatch-CVE-Bootstrap/1.0"
 _NEXT_LINK_RE = re.compile(r'<([^>]+)>;\s*rel="next"')
 CPP_EXTENSIONS = {
     ".c",
@@ -61,7 +61,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Collect CVE records from the official CVEProject cvelistV5 repository, merge them with optional GHSA "
-            "metadata, clone local repositories, prepare per-CVE pre-patch worktrees, and invoke the BugRC "
+            "metadata, clone local repositories, prepare per-CVE pre-patch worktrees, and invoke the RCPatch "
             "CVE dataset/pattern build script."
         ),
     )
@@ -367,7 +367,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         if not args.skip_build:
             print(f"Pipeline output: {pipeline_dir}")
         return 0
-    except BugRCError as exc:
+    except RCPatchError as exc:
         logger.error("%s", exc)
         return 1
     except Exception as exc:  # pragma: no cover - defensive path

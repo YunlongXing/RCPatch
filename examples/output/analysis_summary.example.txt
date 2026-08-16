@@ -1,4 +1,4 @@
-BugRC analysis for libfoo_2026_001
+RCPatch analysis for libfoo_2026_001
 Trigger: src/foo.c:312 in process_input [asan_report] op=memcpy
 Summary: Top candidate #1 at src/parser.c:145 flows to the trigger through chain #1: A wrong length computed in parse_header propagates through handle_msg and becomes the memcpy size at the trigger point.
 

@@ -3,7 +3,7 @@
 
 This script validates source-refined records produced by
 ``run_llm_guided_source_refinement.py``. The LLM is used only as an
-evidence-bounded judge: it may accept, down-rank, or reject BugRC's existing
+evidence-bounded judge: it may accept, down-rank, or reject RCPatch's existing
 refined candidates, but it must not invent new locations.
 """
 
@@ -22,12 +22,12 @@ from urllib import error as urllib_error
 from urllib import request as urllib_request
 
 
-SCHEMA_VERSION = "bugrc.refined_secondary_llm_validation.v1"
-V2_DATASET_SCHEMA = "bugrc.cve_root_cause_dataset.v2"
+SCHEMA_VERSION = "rcpatch.refined_secondary_llm_validation.v1"
+V2_DATASET_SCHEMA = "rcpatch.cve_root_cause_dataset.v2"
 PROMPT_VERSION = "bugrc-refined-record-secondary-validation-v1"
 
-DEFAULT_MODEL = os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini")
-DEFAULT_BASE_URL = os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")
+DEFAULT_MODEL = os.getenv("RCPATCH_LLM_VALIDATION_MODEL", os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini"))
+DEFAULT_BASE_URL = os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
 
 VERDICTS = {"accept", "accept_with_lower_confidence", "manual_review", "reject"}
 QUALITY_LABELS = {
@@ -81,16 +81,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         level=getattr(logging, args.log_level),
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
     )
-    logger = logging.getLogger("bugrc.secondary_refined_validation")
+    logger = logging.getLogger("rcpatch.secondary_refined_validation")
 
     output_dir = Path(args.output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = output_dir / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    api_key = os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("RCPATCH_OPENAI_API_KEY") or os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key and not args.dry_run:
-        logger.error("BUGRC_OPENAI_API_KEY or OPENAI_API_KEY must be set")
+        logger.error("RCPATCH_OPENAI_API_KEY, BUGRC_OPENAI_API_KEY, or OPENAI_API_KEY must be set")
         return 2
 
     refined_dataset = read_json(Path(args.refined_dataset).expanduser().resolve())
@@ -287,7 +287,7 @@ class OpenAIJSONClient:
 
 def system_prompt() -> str:
     return (
-        "You are validating refined CVE root-cause candidates for BugRC. "
+        "You are validating refined CVE root-cause candidates for RCPatch. "
         "Use only the CVE description, patch metadata, prior LLM guidance, old candidate actions, "
         "and refined source candidates provided by the user. Do not invent new files, functions, "
         "line numbers, or root causes. Judge whether the refined candidates should be merged into "

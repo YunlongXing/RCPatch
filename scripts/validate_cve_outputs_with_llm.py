@@ -2,7 +2,7 @@
 """Validate mined CVE root-cause datasets and pattern libraries with an LLM.
 
 The validator is intentionally evidence-bounded: it asks the model to judge
-BugRC's existing records against CVE descriptions and compact code evidence,
+RCPatch's existing records against CVE descriptions and compact code evidence,
 not to invent new root causes. Results are checkpointed as JSONL so a long run
 can be resumed without repeating completed calls.
 """
@@ -24,12 +24,12 @@ from urllib import error as urllib_error
 from urllib import request as urllib_request
 
 
-SCHEMA_VERSION = "bugrc.llm_validation.v1"
+SCHEMA_VERSION = "rcpatch.llm_validation.v1"
 RECORD_PROMPT_VERSION = "bugrc-record-validation-v1"
 PATTERN_PROMPT_VERSION = "bugrc-pattern-validation-v1"
 
-DEFAULT_MODEL = os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini")
-DEFAULT_BASE_URL = os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")
+DEFAULT_MODEL = os.getenv("RCPATCH_LLM_VALIDATION_MODEL", os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini"))
+DEFAULT_BASE_URL = os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
 
 RECORD_LABELS = {"correct", "partially_correct", "uncertain", "likely_incorrect"}
 PATTERN_LABELS = {"valid_pattern", "valid_but_broad", "merge_or_deduplicate", "weak_or_noisy", "likely_incorrect"}
@@ -69,16 +69,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         level=getattr(logging, args.log_level),
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
     )
-    logger = logging.getLogger("bugrc.llm_validation")
+    logger = logging.getLogger("rcpatch.llm_validation")
 
     output_dir = Path(args.output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = output_dir / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    api_key = os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("RCPATCH_OPENAI_API_KEY") or os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key and not args.dry_run:
-        logger.error("BUGRC_OPENAI_API_KEY or OPENAI_API_KEY must be set")
+        logger.error("RCPATCH_OPENAI_API_KEY, BUGRC_OPENAI_API_KEY, or OPENAI_API_KEY must be set")
         return 2
 
     dataset = read_json(Path(args.dataset).expanduser().resolve())
@@ -347,7 +347,7 @@ class OpenAIJSONClient:
                 last_error = str(exc)
 
             sleep_for = min(90.0, (2**attempt) + 0.25)
-            logging.getLogger("bugrc.llm_validation").warning(
+            logging.getLogger("rcpatch.llm_validation").warning(
                 "LLM call failed for %s attempt %d/%d: %s; sleeping %.1fs",
                 task,
                 attempt + 1,
@@ -362,8 +362,8 @@ class OpenAIJSONClient:
 
 def record_system_prompt() -> str:
     return (
-        "You are validating BugRC's mined CVE root-cause records.\n"
-        "Use only the provided CVE description/CWE/reference metadata and BugRC code evidence. "
+        "You are validating RCPatch's mined CVE root-cause records.\n"
+        "Use only the provided CVE description/CWE/reference metadata and RCPatch code evidence. "
         "You may use general software-security knowledge about vulnerability classes, but do not browse and do not invent code facts.\n"
         "Judge whether the proposed root-cause record is semantically consistent with the CVE description and likely vulnerability class.\n"
         "Return JSON only."
@@ -372,7 +372,7 @@ def record_system_prompt() -> str:
 
 def pattern_system_prompt() -> str:
     return (
-        "You are validating BugRC's mined root-cause pattern library.\n"
+        "You are validating RCPatch's mined root-cause pattern library.\n"
         "Use only the provided pattern metadata, representative snippets, and CVE descriptions. "
         "You may use general software-security knowledge, but do not invent new examples or external facts.\n"
         "Judge whether the pattern is coherent, useful, and supported by the representative CVEs.\n"

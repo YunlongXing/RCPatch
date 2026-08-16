@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import AdvisoryReference, AdvisorySourceKind, CVETraceability, CollectedCVERecord, Language, ReferenceType
+from rcpatch.models import AdvisoryReference, AdvisorySourceKind, CVETraceability, CollectedCVERecord, Language, ReferenceType
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "build_cve_semantic_patterns.py"

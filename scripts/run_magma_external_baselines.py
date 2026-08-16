@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run external AVR baseline checks on Magma cases.
 
-This script intentionally keeps the baseline layer separate from BugRC's main
+This script intentionally keeps the baseline layer separate from RCPatch's main
 pipeline.  It prepares either a representative Magma subset or the full Magma
 case set, adapts each case into a function-level input for VulRepair, and
 records whether CPR/ExtractFix can be applied with the artifacts available for
@@ -82,7 +82,7 @@ def row_to_case(row: dict[str, Any]) -> BaselineCase:
 
 
 def select_subset(rows: list[dict[str, Any]], sample_size: int, per_target: int) -> list[BaselineCase]:
-    """Select a target-balanced subset with a mixture of BugRC outcomes."""
+    """Select a target-balanced subset with a mixture of RCPatch outcomes."""
 
     by_target: dict[str, list[dict[str, Any]]] = {}
     for row in rows:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Run patch-generation ablations from existing BugRC benchmark results.
+"""Run patch-generation ablations from existing RCPatch benchmark results.
 
-This script reuses already-computed BugRC evidence and worktrees so expensive
+This script reuses already-computed RCPatch evidence and worktrees so expensive
 source parsing does not need to be repeated for prompt-only ablations.
 Prior-related ablations should still be run with the original benchmark
 evaluators because priors affect candidate ranking before patch generation.
@@ -59,7 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--case-list-file", type=Path, help="Optional JSON/TXT case list.")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--api-base-url", default=os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
+    parser.add_argument("--api-base-url", default=os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")))
     parser.add_argument("--llm-timeout", type=int, default=60)
     parser.add_argument("--max-snippet-chars", type=int, default=14000)
     parser.add_argument("--sleep-seconds", type=float, default=0.0)
@@ -226,7 +226,7 @@ def ablated_bugrc_payload(payload: dict[str, Any], *, variant: str) -> dict[str,
             "candidates": [],
             "chains": [],
             "patch_suggestions": [],
-            "approximations": ["Ablation: BugRC candidates, chains, and patch suggestions hidden from patch generation."],
+            "approximations": ["Ablation: RCPatch candidates, chains, and patch suggestions hidden from patch generation."],
         }
     return payload
 
@@ -256,7 +256,7 @@ def build_llm_only_patch_prompt(
 ) -> str:
     return f"""Generate a vulnerability-blocking source patch using only the bug report, the initial LLM root-cause hypothesis, the trigger location, and nearby source snippets.
 
-This is an ablation baseline. Do not use BugRC root-cause candidates, dependency edges, causality chains, or patch suggestions.
+This is an ablation baseline. Do not use RCPatch root-cause candidates, dependency edges, causality chains, or patch suggestions.
 
 Patch requirements:
 - Return a unified diff relative to the pre-fix repository.
@@ -308,7 +308,7 @@ def build_trigger_site_patch_prompt(
 ) -> str:
     return f"""Generate a trigger-site-only baseline patch for this vulnerability.
 
-This is an ablation baseline. You may use only the trigger location and nearby source snippets. Do not use upstream BugRC root-cause candidates, dependency edges, causality chains, or patch suggestions.
+This is an ablation baseline. You may use only the trigger location and nearby source snippets. Do not use upstream RCPatch root-cause candidates, dependency edges, causality chains, or patch suggestions.
 
 Patch requirements:
 - Patch at or immediately before the trigger site.

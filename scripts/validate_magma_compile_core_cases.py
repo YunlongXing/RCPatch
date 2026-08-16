@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Compile-validate materialized BugRC patches on Magma cases.
+"""Compile-validate materialized RCPatch patches on Magma cases.
 
-The patch-materialization pass proves that BugRC's generated repair can be
+The patch-materialization pass proves that RCPatch's generated repair can be
 placed into a source tree.  This script adds the next evidence layer by
-rebuilding the target before and after the materialized BugRC patch.  Results
+rebuilding the target before and after the materialized RCPatch patch.  Results
 distinguish environment/base-build failures from genuine patch-induced compile
 failures.
 """
@@ -71,7 +71,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="better",
         help=(
             "Case selection policy. 'better' reproduces the original core-claim run; "
-            "'materialized' compiles every materialized BugRC patch; 'matches' compiles "
+            "'materialized' compiles every materialized RCPatch patch; 'matches' compiles "
             "materialized matches/equivalent cases; 'all' includes materialized and "
             "non-materialized cases so patch materialization failures are counted."
         ),
@@ -96,7 +96,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--compile-refinement-mode",
         choices=("off", "conservative", "llm", "conservative_then_llm"),
         default="off",
-        help="Try conservative compiler-error-guided source edits after a BugRC patch compile failure.",
+        help="Try conservative compiler-error-guided source edits after a RCPatch patch compile failure.",
     )
     parser.add_argument(
         "--compile-refinement-passes",
@@ -104,8 +104,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=1,
         help="Maximum conservative compile-refinement attempts per case.",
     )
-    parser.add_argument("--llm-model", default=os.getenv("BUGRC_LLM_MODEL", "gpt-4.1-mini"))
-    parser.add_argument("--llm-base-url", default=os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
+    parser.add_argument("--llm-model", default=os.getenv("RCPATCH_LLM_MODEL", os.getenv("BUGRC_LLM_MODEL", "gpt-4.1-mini")))
+    parser.add_argument("--llm-base-url", default=os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")))
     parser.add_argument("--llm-timeout", type=int, default=90)
     parser.add_argument(
         "--llm-cache-dir",
@@ -454,11 +454,11 @@ def refine_compile_failure_with_llm(
     """Ask an LLM for minimal exact replacements that fix compile integration.
 
     The prompt is deliberately constrained.  The model sees only the current
-    compiler errors, the current BugRC diff, and local source snippets.  It may
+    compiler errors, the current RCPatch diff, and local source snippets.  It may
     return exact old/new replacements in already-touched files, or decline.
     """
 
-    api_key = os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("RCPATCH_OPENAI_API_KEY") or os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key:
         return {"changed": False, "reason": "missing_openai_api_key"}
     diagnostics = parse_compile_diagnostics(f"{build.get('stderr') or ''}\n{build.get('stdout') or ''}")
@@ -950,16 +950,16 @@ def prepare_buggy_source_tree(
     materialize_magma_buggy_files(destination, touched_files)
     run(["git", "init"], cwd=destination, timeout=timeout)
     run(["git", "config", "user.email", "bugrc@example.invalid"], cwd=destination, timeout=timeout, check=False)
-    run(["git", "config", "user.name", "BugRC"], cwd=destination, timeout=timeout, check=False)
+    run(["git", "config", "user.name", "RCPatch"], cwd=destination, timeout=timeout, check=False)
     run(["git", "add", "-A"], cwd=destination, timeout=timeout)
-    run(["git", "commit", "-m", "BugRC Magma buggy source"], cwd=destination, timeout=timeout, check=False)
+    run(["git", "commit", "-m", "RCPatch Magma buggy source"], cwd=destination, timeout=timeout, check=False)
     return destination, setup_patch_results
 
 
 def apply_compile_validation_source_tweaks(repo_path: Path, target_name: str) -> None:
     """Apply host-reproducibility source-tree tweaks before validation builds.
 
-    These are not BugRC repair edits. They only neutralize benchmark setup
+    These are not RCPatch repair edits. They only neutralize benchmark setup
     assumptions that are brittle on a modern host, such as downloading Autotools
     helper scripts during validation.
     """
@@ -1124,9 +1124,9 @@ def clone_source_tree(source: Path, destination: Path) -> Path:
     shutil.copytree(source, destination, ignore=lambda _dir, names: {name for name in names if name == ".git"})
     run(["git", "init"], cwd=destination, timeout=120)
     run(["git", "config", "user.email", "bugrc@example.invalid"], cwd=destination, timeout=120, check=False)
-    run(["git", "config", "user.name", "BugRC"], cwd=destination, timeout=120, check=False)
+    run(["git", "config", "user.name", "RCPatch"], cwd=destination, timeout=120, check=False)
     run(["git", "add", "-A"], cwd=destination, timeout=120)
-    run(["git", "commit", "-m", "BugRC compile validation source"], cwd=destination, timeout=120, check=False)
+    run(["git", "commit", "-m", "RCPatch compile validation source"], cwd=destination, timeout=120, check=False)
     return destination
 
 
@@ -1148,7 +1148,7 @@ def apply_compile_validation_build_tweaks(target_dir: Path, target_name: str) ->
 
     These edits are intentionally limited to the temporary target wrapper used
     for compile validation. They do not change the vulnerable source tree or
-    BugRC's generated patch; they only make historical Magma targets build in
+    RCPatch's generated patch; they only make historical Magma targets build in
     the current host environment when optional dependencies are unavailable.
     """
     if target_name == "libtiff":
@@ -1191,7 +1191,7 @@ def patch_php_build(path: Path) -> None:
     text = path.read_text(encoding="utf-8", errors="replace")
     # PHP-7-era intl code is incompatible with newer system ICU headers. The
     # Magma PHP fuzzers built here do not include an intl fuzzer, and PHP005's
-    # BugRC patch touches ext/iconv, so disabling intl only removes a host
+    # RCPatch patch touches ext/iconv, so disabling intl only removes a host
     # compatibility blocker from compile validation.
     text = text.replace("    --enable-intl \\\n", "")
     path.write_text(text, encoding="utf-8")

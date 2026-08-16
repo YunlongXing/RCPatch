@@ -7,9 +7,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.dynamic_analysis import AsanLikeSanitizerParser, StackTraceParser
-from bugrc.ingestion import BugIngestionService, SourcePathResolver
-from bugrc.models import BugType
+from rcpatch.dynamic_analysis import AsanLikeSanitizerParser, StackTraceParser
+from rcpatch.ingestion import BugIngestionService, SourcePathResolver
+from rcpatch.models import BugType
 
 
 ASAN_REPORT = """\

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Select ARVO cases that are most useful for dynamic patch validation.
 
-The selector consumes the strict high-confidence BugRC-better set and emits a
+The selector consumes the strict high-confidence RCPatch-better set and emits a
 targets JSON compatible with ``scripts/validate_arvo_patch_targets.py``.
 Unlike pure confidence-based selection, it favors cases where dynamic evidence
 would be most valuable for a paper claim: feature-disable/revert reference
-patches, available OSS-Fuzz reproducer metadata, non-pseudo BugRC patches, and
+patches, available OSS-Fuzz reproducer metadata, non-pseudo RCPatch patches, and
 projects that have not repeatedly failed to build in previous validation runs.
 """
 
@@ -109,7 +109,7 @@ def main() -> int:
     selected.sort(key=lambda item: (-item["selection_score"], item["project"], item["local_id"]))
     selected = diversify(selected, limit=args.limit, per_project_limit=args.per_project_limit)
     payload = {
-        "schema_version": "bugrc.arvo_dynamic_validation_targets.v1",
+        "schema_version": "rcpatch.arvo_dynamic_validation_targets.v1",
         "strict_source": args.strict_json.expanduser().resolve().as_posix(),
         "full_results_source": args.full_results_json.expanduser().resolve().as_posix(),
         "limit": args.limit,

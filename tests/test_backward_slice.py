@@ -6,9 +6,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import DependencyRelation, ParserBackend, SourceLocation, TriggerPoint, TriggerType
-from bugrc.source import SourceProjectParser
-from bugrc.slicing import HybridBackwardSlicer
+from rcpatch.models import DependencyRelation, ParserBackend, SourceLocation, TriggerPoint, TriggerType
+from rcpatch.source import SourceProjectParser
+from rcpatch.slicing import HybridBackwardSlicer
 
 
 SAMPLE_SOURCE = """\

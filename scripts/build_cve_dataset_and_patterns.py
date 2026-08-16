@@ -23,7 +23,7 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.cve_mining import (  # noqa: E402
+from rcpatch.cve_mining import (  # noqa: E402
     CVECollectionService,
     CVEDatasetBuildCase,
     CVERootCauseDatasetBuilder,
@@ -33,10 +33,10 @@ from bugrc.cve_mining import (  # noqa: E402
     CollectionSource,
     RootCausePatternMiner,
 )
-from bugrc.errors import BugRCError, ModelSerializationError  # noqa: E402
-from bugrc.llm import FileLLMCache, LLMClient, OpenAICompatibleProvider, SemanticDisambiguator  # noqa: E402
-from bugrc.logging_utils import configure_logging, get_logger  # noqa: E402
-from bugrc.models import (  # noqa: E402
+from rcpatch.errors import RCPatchError, ModelSerializationError  # noqa: E402
+from rcpatch.llm import FileLLMCache, LLMClient, OpenAICompatibleProvider, SemanticDisambiguator  # noqa: E402
+from rcpatch.logging_utils import configure_logging, get_logger  # noqa: E402
+from rcpatch.models import (  # noqa: E402
     AdvisorySourceKind,
     CVEPatchExtraction,
     CVERootCauseMiningResult,
@@ -391,7 +391,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         print(f"Dataset: {dataset_path}")
         print(f"Pattern library: {pattern_library_path}")
         return 0
-    except BugRCError as exc:
+    except RCPatchError as exc:
         logger.error("%s", exc)
         return 1
     except Exception as exc:  # pragma: no cover - defensive path

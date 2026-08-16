@@ -84,7 +84,7 @@ def build_summary(
     label: str,
 ) -> dict[str, Any]:
     return {
-        "schema_version": "bugrc.remaining_refinement_targets.v1",
+        "schema_version": "rcpatch.remaining_refinement_targets.v1",
         "label": label,
         "source_metadata": source_payload.get("metadata", {}),
         "source_record_count": len(records),

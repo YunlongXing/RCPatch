@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Second-pass LLM validation for BugRC patch verdict confidence buckets.
+"""Second-pass LLM validation for RCPatch patch verdict confidence buckets.
 
-The first-pass evaluators already compare BugRC-generated patches against
+The first-pass evaluators already compare RCPatch-generated patches against
 official/reference patches. This script performs an independent second-pass
 audit for selected first-pass verdicts, typically ``bugrc_patch_better`` and
 ``semantically_equivalent``, then reports confidence-bucket distributions.
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 
-DEFAULT_MODEL = os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini")
+DEFAULT_MODEL = os.getenv("RCPATCH_LLM_VALIDATION_MODEL", os.getenv("BUGRC_LLM_VALIDATION_MODEL", "gpt-4.1-mini"))
 DEFAULT_VERDICTS = ("bugrc_patch_better", "semantically_equivalent")
 CONFIDENCE_BUCKETS = (
     (">=0.99", 0.99, 1.0000001),
@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--patch-dir", type=Path, help="Optional ARVO official patch directory.")
     parser.add_argument("--include-verdict", action="append", default=[], help="First-pass verdict to revalidate.")
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--base-url", default=os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
+    parser.add_argument("--base-url", default=os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")))
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--max-retries", type=int, default=5)
@@ -57,9 +57,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     logging.basicConfig(level=getattr(logging, args.log_level.upper()), format="%(asctime)s %(levelname)s %(message)s")
-    api_key = os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("RCPATCH_OPENAI_API_KEY") or os.getenv("BUGRC_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key:
-        logging.error("BUGRC_OPENAI_API_KEY or OPENAI_API_KEY must be set")
+        logging.error("RCPATCH_OPENAI_API_KEY, BUGRC_OPENAI_API_KEY, or OPENAI_API_KEY must be set")
         return 2
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -253,10 +253,10 @@ def build_prompt_payload(record: dict[str, Any], *, meta_dir: Optional[Path], pa
             "reasoning": truncate(str(comparison.get("reasoning") or ""), 2600),
         },
         "bugrc_evidence": {
-            "trigger": compact(bugrc.get("trigger"), 1800),
-            "top_candidates": compact((bugrc.get("candidates") or [])[:5], 6500),
-            "top_chains": compact((bugrc.get("chains") or [])[:3], 7000),
-            "patch_suggestions": compact((bugrc.get("patch_suggestions") or [])[:3], 3500),
+            "trigger": compact(rcpatch.get("trigger"), 1800),
+            "top_candidates": compact((rcpatch.get("candidates") or [])[:5], 6500),
+            "top_chains": compact((rcpatch.get("chains") or [])[:3], 7000),
+            "patch_suggestions": compact((rcpatch.get("patch_suggestions") or [])[:3], 3500),
         },
         "bugrc_generated_patch": {
             "root_cause_location": generated.get("root_cause_location"),
@@ -333,7 +333,7 @@ def judge_case(
         {
             "role": "user",
             "content": (
-                "Re-evaluate the BugRC patch and the reference patch.\n\n"
+                "Re-evaluate the RCPatch patch and the reference patch.\n\n"
                 "Return JSON exactly in this shape:\n"
                 "{\n"
                 '  "validated_verdict": "confirmed_bugrc_better" | "confirmed_equivalent" | "reference_better" | "both_plausible_or_unclear" | "both_incomplete" | "not_enough_evidence",\n'
@@ -355,7 +355,7 @@ def judge_case(
                 "- Use 0.70-0.80 when the verdict is possible but uncertain.\n"
                 "- Use <0.70 when evidence is contradictory, pseudo-patch-like, missing, or not enough for a paper claim.\n\n"
                 "Verdict rules:\n"
-                "- confirmed_bugrc_better: BugRC's concrete patch more directly cuts the root-cause-to-trigger path than the reference patch.\n"
+                "- confirmed_bugrc_better: RCPatch's concrete patch more directly cuts the root-cause-to-trigger path than the reference patch.\n"
                 "- confirmed_equivalent: both patches plausibly cut the same vulnerability path with similar semantic coverage.\n"
                 "- reference_better: the reference patch is more complete or safer.\n"
                 "- both_plausible_or_unclear: both may work but evidence cannot rank them.\n"

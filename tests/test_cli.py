@@ -1,4 +1,4 @@
-"""Tests for the BugRC CLI integration layer."""
+"""Tests for the RCPatch CLI integration layer."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from bugrc.cli import main
-from bugrc.models import AnalysisResult, BugReport
+from rcpatch.cli import main
+from rcpatch.models import AnalysisResult, BugReport
 
 SAMPLE_SOURCE = """\
 #include <stdlib.h>
@@ -101,7 +101,7 @@ class CLITests(unittest.TestCase):
             self.assertEqual(result.analysis_config.top_k_candidates, 1)
             self.assertLessEqual(len(result.root_cause_candidates), 1)
             self.assertLessEqual(len(result.chains), 1)
-            self.assertIn("BugRC analysis for cli_sample", stdout.getvalue())
+            self.assertIn("RCPatch analysis for cli_sample", stdout.getvalue())
 
     def test_explain_command_supports_existing_analysis_result(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

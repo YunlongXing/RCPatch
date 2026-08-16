@@ -4,14 +4,15 @@ set -euo pipefail
 # Run the expanded Magma experiments used to strengthen the paper evaluation.
 #
 # This script is intended to run on the machine that holds the Magma worktrees
-# referenced by the BugRC result JSONL files.  The defaults match the historical
+# referenced by the RCPatch result JSONL files.  The defaults match the historical
 # /home/dragon/bugrc-data layout, but every path can be overridden with an
 # environment variable.
 
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-BUGRC_DATA_ROOT="${BUGRC_DATA_ROOT:-/home/dragon/bugrc-data}"
+RCPATCH_DATA_ROOT="${RCPATCH_DATA_ROOT:-${BUGRC_DATA_ROOT:-/home/dragon/bugrc-data}}"
+BUGRC_DATA_ROOT="${RCPATCH_DATA_ROOT}"
 MAGMA_ROOT="${MAGMA_ROOT:-${BUGRC_DATA_ROOT}/magma/magma}"
 TARGET_WORK_DIR="${TARGET_WORK_DIR:-${BUGRC_DATA_ROOT}/magma/target_work}"
 MAGMA_RESULTS_JSONL="${MAGMA_RESULTS_JSONL:-${BUGRC_DATA_ROOT}/magma/bugrc_magma_full_138_20260602/results.jsonl}"
@@ -31,9 +32,9 @@ VULREPAIR_PYTHON="${VULREPAIR_PYTHON:-${BUGRC_DATA_ROOT}/external_baselines_magm
 mkdir -p "${PAPER_EXPERIMENTS_ROOT}/logs"
 LOG_PATH="${LOG_PATH:-${PAPER_EXPERIMENTS_ROOT}/logs/expanded_magma_${RUN_STAMP}.log}"
 
-echo "[BugRC] project root: ${PROJECT_ROOT}" | tee -a "${LOG_PATH}"
-echo "[BugRC] output external: ${EXTERNAL_OUTPUT_DIR}" | tee -a "${LOG_PATH}"
-echo "[BugRC] output compile: ${COMPILE_OUTPUT_DIR}" | tee -a "${LOG_PATH}"
+echo "[RCPatch] project root: ${PROJECT_ROOT}" | tee -a "${LOG_PATH}"
+echo "[RCPatch] output external: ${EXTERNAL_OUTPUT_DIR}" | tee -a "${LOG_PATH}"
+echo "[RCPatch] output compile: ${COMPILE_OUTPUT_DIR}" | tee -a "${LOG_PATH}"
 
 if [[ "${RUN_EXTERNAL}" == "1" ]]; then
   external_args=(
@@ -48,12 +49,12 @@ if [[ "${RUN_EXTERNAL}" == "1" ]]; then
   if [[ "${PULL_CPR_DOCKER}" == "1" ]]; then
     external_args+=(--pull-cpr-docker)
   fi
-  echo "[BugRC] running full-138 external baseline audit" | tee -a "${LOG_PATH}"
+  echo "[RCPatch] running full-138 external baseline audit" | tee -a "${LOG_PATH}"
   "${PYTHON_BIN}" "${external_args[@]}" 2>&1 | tee -a "${LOG_PATH}"
 fi
 
 if [[ "${RUN_COMPILE}" == "1" ]]; then
-  echo "[BugRC] running materialized-patch compile validation" | tee -a "${LOG_PATH}"
+  echo "[RCPatch] running materialized-patch compile validation" | tee -a "${LOG_PATH}"
   "${PYTHON_BIN}" "${PROJECT_ROOT}/scripts/validate_magma_compile_core_cases.py" \
     --magma-root "${MAGMA_ROOT}" \
     --magma-results-jsonl "${MAGMA_RESULTS_JSONL}" \
@@ -67,5 +68,5 @@ if [[ "${RUN_COMPILE}" == "1" ]]; then
     2>&1 | tee -a "${LOG_PATH}"
 fi
 
-echo "[BugRC] done" | tee -a "${LOG_PATH}"
-echo "[BugRC] log: ${LOG_PATH}" | tee -a "${LOG_PATH}"
+echo "[RCPatch] done" | tee -a "${LOG_PATH}"
+echo "[RCPatch] log: ${LOG_PATH}" | tee -a "${LOG_PATH}"

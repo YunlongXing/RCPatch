@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import (
+from rcpatch.models import (
     AdvisoryReference,
     AdvisorySourceKind,
     CVETraceability,

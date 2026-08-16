@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Evaluate BugRC on Magma as a second real-bug benchmark.
+"""Evaluate RCPatch on Magma as a second real-bug benchmark.
 
 Magma bug patches encode both the vulnerable behavior and the ground-truth
 fixed behavior using ``MAGMA_ENABLE_FIXES``. This runner materializes a
-buggy-only view before running BugRC, then compares BugRC's generated patch
+buggy-only view before running RCPatch, then compares RCPatch's generated patch
 against the Magma ground-truth fix semantics in a separate comparison stage.
 """
 
@@ -54,8 +54,8 @@ from arvo_meta_bugrc_eval import (  # noqa: E402
     shorten,
     with_llm_meta,
 )
-from bugrc.chains import CausalityChainConstructor  # noqa: E402
-from bugrc.models import (  # noqa: E402
+from rcpatch.chains import CausalityChainConstructor  # noqa: E402
+from rcpatch.models import (  # noqa: E402
     AnalysisConfig,
     AnalysisResult,
     BugReport,
@@ -66,10 +66,10 @@ from bugrc.models import (  # noqa: E402
     TriggerPoint,
     TriggerType,
 )
-from bugrc.patch_generation import PatchSuggestionGenerator  # noqa: E402
-from bugrc.ranking import RootCauseCandidateExtractor  # noqa: E402
-from bugrc.source import SourceProjectParser  # noqa: E402
-from bugrc.slicing import HybridBackwardSlicer  # noqa: E402
+from rcpatch.patch_generation import PatchSuggestionGenerator  # noqa: E402
+from rcpatch.ranking import RootCauseCandidateExtractor  # noqa: E402
+from rcpatch.source import SourceProjectParser  # noqa: E402
+from rcpatch.slicing import HybridBackwardSlicer  # noqa: E402
 
 
 C_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"}
@@ -91,16 +91,16 @@ class MagmaCase:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run BugRC on Magma ground-truth bugs.")
+    parser = argparse.ArgumentParser(description="Run RCPatch on Magma ground-truth bugs.")
     parser.add_argument("--magma-root", required=True, type=Path, help="Path to the official Magma repository checkout.")
-    parser.add_argument("--output-dir", required=True, type=Path, help="Directory for Magma BugRC artifacts.")
+    parser.add_argument("--output-dir", required=True, type=Path, help="Directory for Magma RCPatch artifacts.")
     parser.add_argument("--target-work-dir", type=Path, help="Working directory for fetched Magma target repositories.")
     parser.add_argument("--target", action="append", default=[], help="Magma target name to include. May be repeated.")
     parser.add_argument("--case-list-file", type=Path, help="Optional JSON/TXT list of Magma bug IDs to process.")
     parser.add_argument("--sample-size", type=int, default=None, help="Optional random sample size. Default: all cases.")
     parser.add_argument("--seed", type=int, default=20260602)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--api-base-url", default=os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1"))
+    parser.add_argument("--api-base-url", default=os.getenv("RCPATCH_LLM_BASE_URL", os.getenv("BUGRC_LLM_BASE_URL", "https://api.openai.com/v1")))
     parser.add_argument("--llm-timeout", type=int, default=45)
     parser.add_argument("--git-timeout", type=int, default=180)
     parser.add_argument("--case-timeout", type=int, default=300)
@@ -109,9 +109,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--force", action="store_true", help="Reprocess completed cases.")
     parser.add_argument("--dry-run", action="store_true", help="Only write the discovered manifest.")
-    parser.add_argument("--cve-pattern-library", help="Optional BugRC CVE pattern library JSON.")
-    parser.add_argument("--ranker-calibration", help="Optional BugRC ranker calibration JSON.")
-    parser.add_argument("--project-prior", help="Optional BugRC project prior JSON.")
+    parser.add_argument("--cve-pattern-library", help="Optional RCPatch CVE pattern library JSON.")
+    parser.add_argument("--ranker-calibration", help="Optional RCPatch ranker calibration JSON.")
+    parser.add_argument("--project-prior", help="Optional RCPatch project prior JSON.")
     parser.add_argument("--expert-rca-prior", help="Optional expert RCA prior JSON, e.g., Project Zero RCA patterns.")
     parser.add_argument("--expert-rca-min-confidence", type=float, default=0.0)
     parser.add_argument("--expert-rca-weight", type=float, default=0.06)
@@ -119,7 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-bugrc-patch-suggestions",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Include BugRC's conservative patch suggestions in patch-generation evidence.",
+        help="Include RCPatch's conservative patch suggestions in patch-generation evidence.",
     )
     return parser
 
@@ -443,7 +443,7 @@ def prepare_target_base(case: MagmaCase, *, magma_root: Path, target_work_dir: P
             apply_magma_patch(repo_path, setup_patch, replacement_name=setup_patch.stem, timeout=timeout)
         except subprocess.CalledProcessError:
             # Setup patches often tweak fuzzing/build harnesses. They are useful
-            # but not required for BugRC's source-level root-cause analysis.
+            # but not required for RCPatch's source-level root-cause analysis.
             skipped_setup.append(setup_patch.name)
     ensure_git_snapshot(repo_path, timeout=timeout)
     if skipped_setup:
@@ -493,11 +493,11 @@ def ensure_git_snapshot(repo_path: Path, *, timeout: int) -> None:
     if not (repo_path / ".git").exists():
         run(["git", "init"], cwd=repo_path, timeout=timeout)
     run(["git", "config", "user.email", "bugrc@example.invalid"], cwd=repo_path, timeout=timeout, check=False)
-    run(["git", "config", "user.name", "BugRC"], cwd=repo_path, timeout=timeout, check=False)
+    run(["git", "config", "user.name", "RCPatch"], cwd=repo_path, timeout=timeout, check=False)
     run(["git", "add", "-A"], cwd=repo_path, timeout=timeout)
     status = run(["git", "status", "--porcelain"], cwd=repo_path, timeout=timeout)
     if status.stdout.strip():
-        run(["git", "commit", "-m", "BugRC Magma base snapshot"], cwd=repo_path, timeout=timeout)
+        run(["git", "commit", "-m", "RCPatch Magma base snapshot"], cwd=repo_path, timeout=timeout)
 
 
 def prepare_case_worktree(case: MagmaCase, *, target_base: Path, output_dir: Path, timeout: int) -> Path:
@@ -734,7 +734,7 @@ def build_magma_report_text(case: MagmaCase) -> str:
             f"Canary conditions: {'; '.join(case.canary_conditions) or 'not available'}",
             "",
             "This is a Magma ground-truth vulnerability case. The canary condition marks the vulnerable state.",
-            "During patch generation, do not use the Magma ground-truth fixed branch; generate a patch from the buggy source, trigger hints, and BugRC evidence only.",
+            "During patch generation, do not use the Magma ground-truth fixed branch; generate a patch from the buggy source, trigger hints, and RCPatch evidence only.",
         ]
     )
 
@@ -758,7 +758,7 @@ def build_magma_patch_comparison_prompt(
     generated_patch: dict[str, Any],
     magma_reference_patch: str,
 ) -> str:
-    return f"""Compare BugRC's generated patch against the Magma ground-truth fix semantics.
+    return f"""Compare RCPatch's generated patch against the Magma ground-truth fix semantics.
 
 Magma patch interpretation:
 - Lines under #ifdef MAGMA_ENABLE_FIXES represent the ground-truth fixed behavior.
@@ -766,7 +766,7 @@ Magma patch interpretation:
 - MAGMA_LOG marks the bug canary condition, not a source-level fix.
 
 Evaluation goal:
-- Decide whether BugRC's patch blocks the same root-cause-to-trigger path as the Magma fixed branch.
+- Decide whether RCPatch's patch blocks the same root-cause-to-trigger path as the Magma fixed branch.
 - Do not require textual equivalence to Magma instrumentation.
 - Prefer patches that repair the root cause, not only silence the canary.
 
@@ -801,10 +801,10 @@ canary_conditions={list(case.canary_conditions)}
 Synthetic bug report:
 {shorten(report_text, 5000)}
 
-BugRC trigger/candidates/chains:
+RCPatch trigger/candidates/chains:
 {json.dumps({'trigger': bugrc_payload.get('trigger'), 'candidates': bugrc_payload.get('candidates', [])[:5], 'chains': bugrc_payload.get('chains', [])[:3], 'patch_suggestions': bugrc_payload.get('patch_suggestions', [])[:3]}, ensure_ascii=False)[:12000]}
 
-BugRC generated patch:
+RCPatch generated patch:
 {json.dumps(generated_patch, ensure_ascii=False)[:12000]}
 
 Magma reference patch:

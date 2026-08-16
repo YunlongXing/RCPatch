@@ -1,4 +1,4 @@
-"""Tests for enhanced BugRC analysis priors, slicing, and patch suggestions."""
+"""Tests for enhanced RCPatch analysis priors, slicing, and patch suggestions."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.cli import main as bugrc_cli_main
-from bugrc.models import AnalysisConfig, BugReport, BugType, ParserBackend, SourceLocation, TriggerPoint, TriggerType
-from bugrc.patch_generation import PatchSuggestionGenerator
-from bugrc.ranking import RootCauseCandidateExtractor
-from bugrc.source import SourceProjectParser
-from bugrc.slicing import HybridBackwardSlicer
+from rcpatch.cli import main as bugrc_cli_main
+from rcpatch.models import AnalysisConfig, BugReport, BugType, ParserBackend, SourceLocation, TriggerPoint, TriggerType
+from rcpatch.patch_generation import PatchSuggestionGenerator
+from rcpatch.ranking import RootCauseCandidateExtractor
+from rcpatch.source import SourceProjectParser
+from rcpatch.slicing import HybridBackwardSlicer
 
 
 SOURCE = """\

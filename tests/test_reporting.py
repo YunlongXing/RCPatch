@@ -10,8 +10,8 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from bugrc.pipeline import BugRCPipeline, PipelineOutputManager
-from bugrc.reporting import build_concise_report, render_html_report
+from rcpatch.pipeline import RCPatchPipeline, PipelineOutputManager
+from rcpatch.reporting import build_concise_report, render_html_report
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[1] / "scripts"
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -53,7 +53,7 @@ class ReportingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             workspace = Path(temp_dir)
             spec_path = _write_sample_spec(workspace)
-            pipeline = BugRCPipeline()
+            pipeline = RCPatchPipeline()
             artifacts = pipeline.run_analysis(spec_path)
             result = artifacts.analysis_result
 
@@ -98,7 +98,7 @@ class ReportingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             workspace = Path(temp_dir)
             spec_path = _write_sample_spec(workspace)
-            pipeline = BugRCPipeline()
+            pipeline = RCPatchPipeline()
             artifacts = pipeline.run_analysis(spec_path)
             output_dir = workspace / "out" / "analysis"
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -120,13 +120,13 @@ class ReportingTests(unittest.TestCase):
             report_dir = workspace / "out" / "report"
             self.assertTrue((report_dir / "concise_report.json").exists())
             self.assertTrue((report_dir / "concise_report.txt").exists())
-            self.assertIn("BugRC concise report for report_sample", stdout.getvalue())
+            self.assertIn("RCPatch concise report for report_sample", stdout.getvalue())
 
     def test_export_analysis_writes_html_report_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             workspace = Path(temp_dir)
             spec_path = _write_sample_spec(workspace)
-            pipeline = BugRCPipeline()
+            pipeline = RCPatchPipeline()
             artifacts = pipeline.run_analysis(spec_path)
             output_dir = workspace / "out" / "analysis"
             output_manager = PipelineOutputManager()
@@ -141,7 +141,7 @@ class ReportingTests(unittest.TestCase):
             html = (output_dir / "analysis_report.html").read_text(encoding="utf-8")
             manifest = json.loads((output_dir / "run_manifest.json").read_text(encoding="utf-8"))
 
-            self.assertIn("BugRC Evidence Report", html)
+            self.assertIn("RCPatch Evidence Report", html)
             self.assertEqual(manifest["bug_id"], "report_sample")
             self.assertEqual(manifest["metrics"]["candidate_count"], len(artifacts.candidates))
 
@@ -149,7 +149,7 @@ class ReportingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             workspace = Path(temp_dir)
             spec_path = _write_sample_spec(workspace)
-            pipeline = BugRCPipeline()
+            pipeline = RCPatchPipeline()
             artifacts = pipeline.run_analysis(spec_path)
             assert artifacts.analysis_result is not None
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the OpenSSL SM2 BugRC case and emit a concise top-results report."""
+"""Run the OpenSSL SM2 RCPatch case and emit a concise top-results report."""
 
 from __future__ import annotations
 
@@ -19,19 +19,19 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.models import AnalysisResult  # noqa: E402
-from bugrc.reporting import build_concise_report, collect_standard_artifacts, render_concise_report  # noqa: E402
+from rcpatch.models import AnalysisResult  # noqa: E402
+from rcpatch.reporting import build_concise_report, collect_standard_artifacts, render_concise_report  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the OpenSSL 1.1.1k SM2 case and emit a concise BugRC report.",
+        description="Run the OpenSSL 1.1.1k SM2 case and emit a concise RCPatch report.",
     )
     parser.add_argument(
         "--work-dir",
         type=Path,
         default=PROJECT_ROOT / ".tmp" / "report_openssl_sm2_case",
-        help="Fresh working directory for the full BugRC reproduction and exported report.",
+        help="Fresh working directory for the full RCPatch reproduction and exported report.",
     )
     parser.add_argument(
         "--openssl-root",
@@ -49,13 +49,13 @@ def parse_args() -> argparse.Namespace:
         "--top-k",
         type=int,
         default=20,
-        help="Number of candidates to ask BugRC to retain internally.",
+        help="Number of candidates to ask RCPatch to retain internally.",
     )
     parser.add_argument(
         "--max-chains",
         type=int,
         default=10,
-        help="Maximum number of chains to ask BugRC to export internally.",
+        help="Maximum number of chains to ask RCPatch to export internally.",
     )
     parser.add_argument(
         "--report-candidates",
@@ -73,7 +73,7 @@ def parse_args() -> argparse.Namespace:
         "--log-level",
         default="INFO",
         choices=("DEBUG", "INFO", "WARNING", "ERROR"),
-        help="Log level forwarded to the underlying BugRC reproduction script.",
+        help="Log level forwarded to the underlying RCPatch reproduction script.",
     )
     parser.add_argument(
         "--preserve-work-dir",

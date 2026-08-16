@@ -7,9 +7,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.cve_mining import CVECollectionService, CollectionSource
-from bugrc.models import AdvisorySourceKind, Language, ReferenceType
-from bugrc.models.schema_registry import generate_schema_bundle
+from rcpatch.cve_mining import CVECollectionService, CollectionSource
+from rcpatch.models import AdvisorySourceKind, Language, ReferenceType
+from rcpatch.models.schema_registry import generate_schema_bundle
 
 
 class CVECollectionTests(unittest.TestCase):

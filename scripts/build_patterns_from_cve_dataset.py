@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a CVE root-cause pattern library from an existing dataset JSON.
 
-This is a lightweight adapter around BugRC's ``RootCausePatternMiner``. It is
+This is a lightweight adapter around RCPatch's ``RootCausePatternMiner``. It is
 useful after LLM-guided merge stages, where the dataset has additional
 traceability fields that are not part of the strict model schema.
 """
@@ -24,8 +24,8 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.cve_mining import RootCausePatternMiner  # noqa: E402
-from bugrc.models import (  # noqa: E402
+from rcpatch.cve_mining import RootCausePatternMiner  # noqa: E402
+from rcpatch.models import (  # noqa: E402
     CVERootCauseAnnotation,
     CVERootCauseDataset,
     CVERootCauseDatasetRecord,
@@ -84,7 +84,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     pattern_payload["metadata"] = {
         **pattern_payload.get("metadata", {}),
-        "schema_version": "bugrc.cve_pattern_library.v3",
+        "schema_version": "rcpatch.cve_pattern_library.v3",
         "source_dataset": dataset_path.as_posix(),
         "source_dataset_schema": raw_dataset.get("metadata", {}).get("schema_version"),
         "source_dataset_record_count": len(raw_dataset.get("records", []) or []),
@@ -250,7 +250,7 @@ def build_summary(
         for pattern in sorted(patterns, key=lambda item: int(item.get("support_count") or 0), reverse=True)[:25]
     ]
     return {
-        "schema_version": "bugrc.cve_pattern_library_build_summary.v3",
+        "schema_version": "rcpatch.cve_pattern_library_build_summary.v3",
         "source_dataset": dataset_path.as_posix(),
         "source_dataset_schema": raw_dataset.get("metadata", {}).get("schema_version"),
         "output": output_path.as_posix(),

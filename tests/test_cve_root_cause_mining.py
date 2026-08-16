@@ -9,8 +9,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from bugrc.cve_mining import CVERootCauseMiner, CVEPatchExtractor
-from bugrc.models import (
+from rcpatch.cve_mining import CVERootCauseMiner, CVEPatchExtractor
+from rcpatch.models import (
     AdvisoryReference,
     AdvisorySourceKind,
     CVEAffectedVersion,
@@ -42,7 +42,7 @@ class CVERootCauseMiningTests(unittest.TestCase):
             repo_root = Path(temp_dir) / "repo"
             repo_root.mkdir()
             _git(repo_root, "init")
-            _git(repo_root, "config", "user.name", "BugRC")
+            _git(repo_root, "config", "user.name", "RCPatch")
             _git(repo_root, "config", "user.email", "bugrc@example.com")
 
             src_dir = repo_root / "src"

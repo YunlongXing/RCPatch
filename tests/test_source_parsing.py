@@ -6,8 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import MemoryOperationKind, ParserBackend, StatementKind
-from bugrc.source import SourceProjectParser
+from rcpatch.models import MemoryOperationKind, ParserBackend, StatementKind
+from rcpatch.source import SourceProjectParser
 
 
 FOO_C = """\

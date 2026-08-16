@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Run BugRC on the OpenSSL 1.1.1k SM2 decrypt overflow case.
+"""Run RCPatch on the OpenSSL 1.1.1k SM2 decrypt overflow case.
 
-By default this helper points BugRC at the full extracted OpenSSL tree and
+By default this helper points RCPatch at the full extracted OpenSSL tree and
 generates a fresh bug specification from scratch. A subset-copy mode remains
 available for debugging parser behavior, but it is opt-in and not used by
 default.
@@ -28,7 +28,7 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.pipeline import BugRCPipeline, PipelineOutputManager  # noqa: E402
+from rcpatch.pipeline import RCPatchPipeline, PipelineOutputManager  # noqa: E402
 
 
 REQUIRED_OPENSSL_FILES = (
@@ -39,13 +39,13 @@ REQUIRED_OPENSSL_FILES = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Reproduce the OpenSSL 1.1.1k SM2 BugRC case from scratch.",
+        description="Reproduce the OpenSSL 1.1.1k SM2 RCPatch case from scratch.",
     )
     parser.add_argument(
         "--work-dir",
         type=Path,
         default=PROJECT_ROOT / ".tmp" / "reproduce_openssl_sm2_case",
-        help="Fresh working directory for extraction, generated spec, and BugRC outputs.",
+        help="Fresh working directory for extraction, generated spec, and RCPatch outputs.",
     )
     parser.add_argument(
         "--openssl-root",
@@ -75,7 +75,7 @@ def parse_args() -> argparse.Namespace:
         "--output-dir",
         type=Path,
         default=None,
-        help="Directory where BugRC output artifacts should be written. Defaults under --work-dir.",
+        help="Directory where RCPatch output artifacts should be written. Defaults under --work-dir.",
     )
     parser.add_argument(
         "--spec-path",
@@ -99,7 +99,7 @@ def parse_args() -> argparse.Namespace:
         "--log-level",
         default="INFO",
         choices=("DEBUG", "INFO", "WARNING", "ERROR"),
-        help="BugRC log level.",
+        help="RCPatch log level.",
     )
     parser.add_argument(
         "--preserve-work-dir",
@@ -251,7 +251,7 @@ def main() -> int:
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
     )
 
-    pipeline = BugRCPipeline()
+    pipeline = RCPatchPipeline()
     output_manager = PipelineOutputManager()
 
     artifacts = pipeline.run_analysis(
@@ -270,7 +270,7 @@ def main() -> int:
 
     result = artifacts.analysis_result
     if result is None:
-        raise SystemExit("BugRC did not produce an analysis result.")
+        raise SystemExit("RCPatch did not produce an analysis result.")
 
     print(summary_text)
     print("")

@@ -3,7 +3,7 @@
 
 The input is the refinement target file produced by
 `build_llm_guided_refinement_plan.py`. For each target this driver rebuilds the
-pre-patch worktree, re-runs BugRC's patch-anchored root-cause miner, and applies
+pre-patch worktree, re-runs RCPatch's patch-anchored root-cause miner, and applies
 the LLM guidance as a reranking signal. The LLM guidance is not treated as
 ground truth; every refined candidate still comes from source/patch analysis.
 """
@@ -30,9 +30,9 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.cve_mining import CVEPatchExtractor, CVERootCauseMiner  # noqa: E402
-from bugrc.logging_utils import configure_logging, get_logger  # noqa: E402
-from bugrc.models import CandidateLabel, CollectedCVERecord, ParserBackend, RootCauseCandidate  # noqa: E402
+from rcpatch.cve_mining import CVEPatchExtractor, CVERootCauseMiner  # noqa: E402
+from rcpatch.logging_utils import configure_logging, get_logger  # noqa: E402
+from rcpatch.models import CandidateLabel, CollectedCVERecord, ParserBackend, RootCauseCandidate  # noqa: E402
 
 
 BOOTSTRAP_SCRIPT = PROJECT_ROOT / "scripts" / "bootstrap_cve_corpus.py"
@@ -253,7 +253,7 @@ def build_refined_record(
     ]
     old_actions = list(target.get("candidate_actions", []) or [])
     return {
-        "schema_version": "bugrc.llm_guided_source_refinement.v1",
+        "schema_version": "rcpatch.llm_guided_source_refinement.v1",
         "cve_id": record.cve_id,
         "project": record.project,
         "repo_url": record.repo_url,
@@ -431,7 +431,7 @@ def write_outputs(output_dir: Path, refined_path: Path, failures_path: Path, *, 
     failures = load_jsonl(failures_path)
     dataset = {
         "metadata": {
-            "schema_version": "bugrc.llm_guided_source_refinement_dataset.v1",
+            "schema_version": "rcpatch.llm_guided_source_refinement_dataset.v1",
             "record_count": len(records),
             "total_targets": total_targets,
             "completed_targets": completed,
@@ -442,7 +442,7 @@ def write_outputs(output_dir: Path, refined_path: Path, failures_path: Path, *, 
     }
     write_json(output_dir / "refined_dataset.json", dataset)
     summary = {
-        "schema_version": "bugrc.llm_guided_source_refinement_summary.v1",
+        "schema_version": "rcpatch.llm_guided_source_refinement_summary.v1",
         "total_targets": total_targets,
         "completed_targets": completed,
         "refined_record_count": len(records),
@@ -586,7 +586,7 @@ class target_timeout:
 
 def failure_payload(cve_id: str, reason: str, message: str, *, target: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     return {
-        "schema_version": "bugrc.llm_guided_source_refinement_failure.v1",
+        "schema_version": "rcpatch.llm_guided_source_refinement_failure.v1",
         "cve_id": cve_id,
         "reason": reason,
         "message": message,

@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.pipeline import BugRCPipeline
+from rcpatch.pipeline import RCPatchPipeline
 
 
 CRYPTO_C = """\
@@ -148,7 +148,7 @@ class Sm2RegressionTests(unittest.TestCase):
             }
             spec_path.write_text(json.dumps(spec_payload, indent=2), encoding="utf-8")
 
-            pipeline = BugRCPipeline()
+            pipeline = RCPatchPipeline()
             artifacts = pipeline.run_analysis(spec_path)
             result = artifacts.analysis_result
 
@@ -213,7 +213,7 @@ class Sm2RegressionTests(unittest.TestCase):
             }
             spec_path.write_text(json.dumps(spec_payload, indent=2), encoding="utf-8")
 
-            pipeline = BugRCPipeline()
+            pipeline = RCPatchPipeline()
             artifacts = pipeline.run_analysis(spec_path)
             result = artifacts.analysis_result
 

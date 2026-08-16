@@ -1,10 +1,10 @@
-# BugRC
+# RCPatch
 
-BugRC is a research prototype for **root-cause-guided vulnerability repair** in
-C/C++ projects. Given a bug report with a trigger location and optional runtime,
-patch, issue, CVE, or expert RCA evidence, BugRC reconstructs a
-root-cause-to-trigger causality chain, ranks root-cause candidates, and emits
-evidence-grounded patch suggestions and audit artifacts.
+RCPatch is a research prototype for **root-cause-guided patch generation** in
+C/C++ projects. Given a target repository, a vulnerability trigger, and any
+available supporting evidence, RCPatch reconstructs a root-cause-to-trigger
+causality chain, ranks root-cause candidates, and emits evidence-grounded patch
+suggestions and audit artifacts.
 
 This public repository contains the software artifact only: source code, tests,
 examples, lightweight priors, and reproduction/evaluation drivers. Large
@@ -13,7 +13,7 @@ materials are intentionally not included.
 
 ## Core Idea
 
-BugRC is designed around one principle:
+RCPatch is designed around one principle:
 
 > A vulnerability patch should cut the causal path from the vulnerability
 > origin to the trigger, not merely suppress the crash-site symptom.
@@ -26,8 +26,8 @@ The implementation provides:
   fallbacks for incomplete projects.
 - Trigger-guided backward slicing over variables, sizes, indices, pointers,
   branch guards, returns, globals, and heap-like aliases.
-- Root-cause candidate ranking with explicit features and optional CVE-derived,
-  project-specific, or expert-curated priors.
+- Root-cause candidate ranking with explicit features and optional CVE-derived
+  or project-specific priors.
 - Optional OpenAI-compatible LLM interpretation for ambiguous candidate labels
   and patch intent. LLM output is used only to interpret extracted evidence.
 - Patch suggestion, patch-aware analysis, JSON/HTML/text reporting, run
@@ -39,34 +39,35 @@ The following numbers summarize the authors' latest evaluation runs. Raw ARVO,
 Magma, and CVE corpora are not included in this repository because they are
 large and should be obtained from their original sources.
 
-- **ARVO-Meta:** BugRC completed 3,660 analyses from 4,993 C/C++ bug reports.
-  A first-pass semantic comparison identified 2,184 cases where the BugRC patch
+- **ARVO-Meta:** RCPatch completed 3,660 analyses from 4,993 C/C++ bug reports.
+  A first-pass semantic comparison identified 2,184 cases where the RCPatch patch
   was preferred over the benchmark reference patch and 69 semantically
-  equivalent cases. A second-pass audit confirmed 2,182 BugRC-preferred cases
+  equivalent cases. A second-pass audit confirmed 2,182 RCPatch-preferred cases
   and 69 equivalent cases, with only two ARVO cases rejected or unsupported.
-- **Magma:** On all 138 Magma vulnerabilities, BugRC matched the reference
+- **Magma:** On all 138 Magma vulnerabilities, RCPatch matched the reference
   repair semantics in 104 cases, produced a stronger source-level repair in 20
   cases, was incomplete or reference-worse in 13 cases, and left one case
-  outside the claim taxonomy. BugRC therefore matched or improved the reference
+  outside the claim taxonomy. RCPatch therefore matched or improved the reference
   repair in 124 of 138 cases, about 90%, under the evaluation taxonomy.
 - **Patch materialization:** After refinement, 115 of 138 generated Magma diffs
   were applicable source patches; 113 passed `diff --check`.
 - **Compile validation:** Among the 115 materialized Magma patches, 112 had
-  buildable unpatched baselines and 95 BugRC-patched versions compiled after
-  compile-guided refinement. In the 12-case Magma core-claim set, all baseline
-  versions and all 12 BugRC-patched versions compiled.
+  buildable unpatched baselines and 95 RCPatch-patched versions compiled after
+  compile-guided refinement.
+- **Same-testcase behavior evidence:** Seven Magma cases additionally showed
+  observed-signature disappearance on the same testcase.
 - **Ablation:** Removing the causality chain reduced performance, while a
   trigger-site patch baseline dropped to 65.2% on Magma, supporting the value
   of root-cause-to-trigger reasoning.
 
 These numbers are artifact context, not standalone proof of patch correctness.
-BugRC reports semantic, materialization, and validation evidence separately.
+RCPatch reports semantic, materialization, and validation evidence separately.
 Compact sanitized result files are included under `results/`.
 
 ## Repository Layout
 
 ```text
-src/bugrc/
+src/rcpatch/
   models/           Pydantic data models and JSON contracts
   ingestion/        Bug-spec loading and evidence normalization
   dynamic_analysis/ ASan-like sanitizer and stack trace parsing
@@ -78,7 +79,7 @@ src/bugrc/
   llm/              Optional OpenAI-compatible semantic interpretation
   validation/       Patch/build/reproducer validation harness
   pipeline.py       End-to-end orchestration
-  cli.py            bugrc command-line interface
+  cli.py            rcpatch command-line interface
 
 scripts/            Reproduction, CVE-mining, ARVO, and Magma drivers
 examples/           JSON schema-shape inputs and output examples
@@ -104,15 +105,15 @@ Recommended for development:
 Optional:
 
 - `ctags`, `clang`, or tree-sitter-related tooling for richer source parsing.
-  BugRC falls back to regex/heuristic parsing when these are unavailable.
+  RCPatch falls back to regex/heuristic parsing when these are unavailable.
 - An OpenAI-compatible API key for optional LLM-assisted interpretation:
-  `BUGRC_OPENAI_API_KEY` or `OPENAI_API_KEY`.
+  `RCPATCH_OPENAI_API_KEY`, legacy `BUGRC_OPENAI_API_KEY`, or `OPENAI_API_KEY`.
 
 ## Installation
 
 ```bash
-git clone https://github.com/YunlongXing/BugRC.git
-cd BugRC
+git clone https://github.com/YunlongXing/RCPatch.git
+cd RCPatch
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install --upgrade pip
@@ -128,16 +129,17 @@ PYTHONPATH=src python3 -m unittest discover -s tests
 
 ## Basic Usage
 
-BugRC exposes a `bugrc` command after installation:
+RCPatch exposes a `rcpatch` command after installation. The legacy `bugrc`
+entry point remains available for older scripts:
 
 ```bash
-bugrc ingest examples/bug_report.example.json --output-dir out/ingest
-bugrc rank examples/bug_report.example.json --parser-backend regex --top-k 3 --output-dir out/rank
-bugrc analyze examples/bug_report.example.json --config examples/analysis_config.example.json --output-dir out/analyze
-bugrc explain examples/bug_report.example.json --output-dir out/explain
-bugrc export examples/bug_report.example.json --patch-aware --output-dir out/export
-bugrc suggest-patch examples/bug_report.example.json --output-dir out/patches
-bugrc validate-patch --repo /path/to/repo --patch fix.diff --build-cmd "make -j2" --output-dir out/validate
+rcpatch ingest examples/bug_report.example.json --output-dir out/ingest
+rcpatch rank examples/bug_report.example.json --parser-backend regex --top-k 3 --output-dir out/rank
+rcpatch analyze examples/bug_report.example.json --config examples/analysis_config.example.json --output-dir out/analyze
+rcpatch explain examples/bug_report.example.json --output-dir out/explain
+rcpatch export examples/bug_report.example.json --patch-aware --output-dir out/export
+rcpatch suggest-patch examples/bug_report.example.json --output-dir out/patches
+rcpatch validate-patch --repo /path/to/repo --patch fix.diff --build-cmd "make -j2" --output-dir out/validate
 ```
 
 Useful options:
@@ -149,8 +151,6 @@ Useful options:
   boosts.
 - `--project-prior`: load project-specific pattern priors mined from curated
   results.
-- `--expert-rca-prior`: load a small expert-curated RCA prior as optional weak
-  supervision.
 - `--llm/--no-llm`: enable or disable optional semantic interpretation.
 - `--llm-model`: OpenAI-compatible model name when LLM mode is enabled.
 
@@ -158,11 +158,11 @@ Useful options:
 
 ### CVE Pattern Prior
 
-Historical CVE mining outputs can be used directly by the normal BugRC
+Historical CVE mining outputs can be used directly by the normal RCPatch
 pipeline:
 
 ```bash
-bugrc analyze examples/bug_report.example.json \
+rcpatch analyze examples/bug_report.example.json \
   --parser-backend regex \
   --cve-pattern-library data/cve_pattern_library.v4.clean.json \
   --output-dir out/analyze-with-cve-prior
@@ -172,22 +172,6 @@ The prior is deliberately weak supervision. It does not create new candidates
 and does not replace source, patch, or runtime evidence. It only adds
 `cve_pattern_prior_*` features and a bounded score contribution when an existing
 candidate matches a pattern mined from historical CVEs.
-
-### Expert RCA Prior
-
-BugRC can also consume small expert-curated RCA corpora as an optional prior:
-
-```bash
-bugrc analyze examples/bug_report.example.json \
-  --parser-backend regex \
-  --expert-rca-prior examples/expert_rca_prior.example.json \
-  --output-dir out/analyze-with-expert-prior
-```
-
-The expert RCA prior is disabled by default and has a smaller default score
-contribution. It can only boost candidates already recovered by source
-analysis; it cannot introduce new source locations, dependency edges, or patch
-targets.
 
 ## Benchmark Drivers
 
@@ -209,7 +193,7 @@ python3 scripts/magma_bugrc_eval.py \
 ```
 
 The runner writes `magma_manifest.json`, `results.jsonl`, and `summary.json`.
-It materializes a buggy-only source view so BugRC cannot inspect the fixed
+It materializes a buggy-only source view so RCPatch cannot inspect the fixed
 branch during patch generation; Magma patches are used only during comparison.
 
 ### ARVO-Meta
@@ -230,10 +214,10 @@ python3 scripts/arvo_meta_bugrc_eval.py \
 
 ## Patch Validation
 
-BugRC includes a lightweight validation harness in `bugrc.validation`:
+RCPatch includes a lightweight validation harness in `rcpatch.validation`:
 
 ```python
-from bugrc.validation import PatchValidationHarness, ValidationCommand
+from rcpatch.validation import PatchValidationHarness, ValidationCommand
 
 harness = PatchValidationHarness()
 result = harness.validate_existing_tree(
@@ -260,14 +244,14 @@ python3 scripts/run_openssl_sm2_case.py --output-dir out/sm2
 python3 scripts/report_openssl_sm2_case.py --output-dir out/sm2-report
 ```
 
-This example is intentionally small and is meant to exercise the BugRC pipeline,
+This example is intentionally small and is meant to exercise the RCPatch pipeline,
 not to replace the full OpenSSL build.
 
 ## Outputs
 
 Every `ingest`, `rank`, `analyze`, `explain`, and `export` bundle includes:
 
-- `run_manifest.json`: BugRC version, Python/platform details, effective config,
+- `run_manifest.json`: RCPatch version, Python/platform details, effective config,
   input fingerprints, output fingerprints, and stage-level metrics.
 - `analysis_result.json`: normalized root-cause candidates, causality chains,
   patch suggestions, and diagnostic metadata.
@@ -292,5 +276,5 @@ PYTHONPATH=src python3 -m unittest discover -s tests
 Run a targeted test:
 
 ```bash
-PYTHONPATH=src python3 -m unittest tests.test_expert_rca_prior
+PYTHONPATH=src python3 -m unittest tests.test_models
 ```

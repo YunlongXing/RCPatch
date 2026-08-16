@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summarize BugRC ablation outputs into JSON and Markdown tables."""
+"""Summarize RCPatch ablation outputs into JSON and Markdown tables."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from typing import Any
 
 
 VARIANT_LABELS = {
-    "full": "Full BugRC",
+    "full": "Full RCPatch",
     "without_causality_chain": "w/o causality chain",
     "without_cve_pattern_prior": "w/o CVE/pattern prior",
     "without_project_prior": "w/o project prior",

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Evaluate BugRC on a random ARVO-Meta sample.
+"""Evaluate RCPatch on a random ARVO-Meta sample.
 
 The first two stages intentionally avoid official patch files:
 1. use the bug report plus an LLM to produce an initial root-cause hypothesis;
-2. run BugRC on the pre-fix source and ask the LLM to generate a patch from the
-   report, BugRC candidates, causality chains, and source snippets.
+2. run RCPatch on the pre-fix source and ask the LLM to generate a patch from the
+   report, RCPatch candidates, causality chains, and source snippets.
 
 Official patches are read only in the comparison stage.
 """
@@ -45,8 +45,8 @@ except ImportError:
 if pydantic is None and VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.chains import CausalityChainConstructor  # noqa: E402
-from bugrc.models import (  # noqa: E402
+from rcpatch.chains import CausalityChainConstructor  # noqa: E402
+from rcpatch.models import (  # noqa: E402
     AnalysisConfig,
     AnalysisResult,
     BugReport,
@@ -56,10 +56,10 @@ from bugrc.models import (  # noqa: E402
     TriggerPoint,
     TriggerType,
 )
-from bugrc.patch_generation import PatchSuggestionGenerator  # noqa: E402
-from bugrc.ranking import RootCauseCandidateExtractor  # noqa: E402
-from bugrc.source import SourceProjectParser  # noqa: E402
-from bugrc.slicing import HybridBackwardSlicer  # noqa: E402
+from rcpatch.patch_generation import PatchSuggestionGenerator  # noqa: E402
+from rcpatch.ranking import RootCauseCandidateExtractor  # noqa: E402
+from rcpatch.source import SourceProjectParser  # noqa: E402
+from rcpatch.slicing import HybridBackwardSlicer  # noqa: E402
 
 
 C_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".c++", ".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"}
@@ -83,7 +83,7 @@ class LLMResult:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run a remote ARVO-Meta BugRC evaluation sample.")
+    parser = argparse.ArgumentParser(description="Run a remote ARVO-Meta RCPatch evaluation sample.")
     parser.add_argument("--meta-dir", required=True, help="Directory containing ARVO-Meta JSON bug reports.")
     parser.add_argument("--patch-dir", required=True, help="Directory containing official localId.diff files.")
     parser.add_argument("--output-dir", required=True, help="Directory for evaluation artifacts.")
@@ -103,9 +103,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--force", action="store_true", help="Reprocess cases already present in results.jsonl.")
     parser.add_argument("--dry-run", action="store_true", help="Only write sample manifest.")
-    parser.add_argument("--cve-pattern-library", help="Optional BugRC CVE pattern library JSON.")
-    parser.add_argument("--ranker-calibration", help="Optional BugRC ranker calibration JSON.")
-    parser.add_argument("--project-prior", help="Optional BugRC project prior JSON.")
+    parser.add_argument("--cve-pattern-library", help="Optional RCPatch CVE pattern library JSON.")
+    parser.add_argument("--ranker-calibration", help="Optional RCPatch ranker calibration JSON.")
+    parser.add_argument("--project-prior", help="Optional RCPatch project prior JSON.")
     parser.add_argument("--expert-rca-prior", help="Optional expert RCA prior JSON, e.g., Project Zero RCA patterns.")
     parser.add_argument("--expert-rca-min-confidence", type=float, default=0.0)
     parser.add_argument("--expert-rca-weight", type=float, default=0.06)
@@ -113,7 +113,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-bugrc-patch-suggestions",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Include BugRC's conservative patch suggestions in the patch-generation evidence.",
+        help="Include RCPatch's conservative patch suggestions in the patch-generation evidence.",
     )
     return parser
 
@@ -621,7 +621,7 @@ def build_patch_generation_prompt(
         "chains": bugrc_payload.get("chains", [])[:3],
         "patch_suggestions": bugrc_payload.get("patch_suggestions", [])[:3],
     }
-    return f"""Generate a source patch for this bug using only the bug report, BugRC root-cause candidates, causality chains, and source snippets. Do not use or assume the official patch.
+    return f"""Generate a source patch for this bug using only the bug report, RCPatch root-cause candidates, causality chains, and source snippets. Do not use or assume the official patch.
 
 Primary goal:
 - Identify the root-cause-to-trigger vulnerability path.
@@ -662,7 +662,7 @@ crash_type={meta.get('crash_type')}
 Initial LLM root cause:
 {json.dumps(initial_root_cause, ensure_ascii=False)[:5000]}
 
-BugRC evidence:
+RCPatch evidence:
 {json.dumps(slim_bugrc, ensure_ascii=False)[:14000]}
 
 Source snippets:
@@ -680,12 +680,12 @@ def build_patch_comparison_prompt(
     generated_patch: dict[str, Any],
     official_patch: str,
 ) -> str:
-    return f"""Compare BugRC's generated patch against the official patch for the same bug.
+    return f"""Compare RCPatch's generated patch against the official patch for the same bug.
 
 Evaluation goal:
-- Decide whether BugRC's patch better blocks the root-cause-to-trigger vulnerability path.
+- Decide whether RCPatch's patch better blocks the root-cause-to-trigger vulnerability path.
 - Decide whether the official patch fully cuts that same path, only mitigates a symptom, adds a compensating guard, or misses an upstream root cause.
-- A claim that BugRC is better requires evidence that BugRC's cut point blocks the vulnerability path and the official patch is incomplete, wrong, too narrow, or does not address the root cause.
+- A claim that RCPatch is better requires evidence that RCPatch's cut point blocks the vulnerability path and the official patch is incomplete, wrong, too narrow, or does not address the root cause.
 
 Return JSON with:
 {{
@@ -709,9 +709,9 @@ Return JSON with:
 }}
 
 Use conservative standards:
-- Use "official_incomplete_bugrc_blocks" only if the evidence shows a root-cause path that BugRC blocks and the official patch does not fully block.
+- Use "official_incomplete_bugrc_blocks" only if the evidence shows a root-cause path that RCPatch blocks and the official patch does not fully block.
 - If both patches plausibly cut the path, use semantically_equivalent, both_plausible, or official_patch_better.
-- If BugRC patch is a pseudo patch, missing a concrete diff, or has resource-balance risk, do not make a strong proof claim.
+- If RCPatch patch is a pseudo patch, missing a concrete diff, or has resource-balance risk, do not make a strong proof claim.
 
 Bug metadata:
 project={meta.get('project')}
@@ -721,10 +721,10 @@ crash_type={meta.get('crash_type')}
 Bug report:
 {shorten(report_text, 6000)}
 
-BugRC trigger/candidates/chains:
+RCPatch trigger/candidates/chains:
 {json.dumps({'trigger': bugrc_payload.get('trigger'), 'candidates': bugrc_payload.get('candidates', [])[:5], 'chains': bugrc_payload.get('chains', [])[:3], 'patch_suggestions': bugrc_payload.get('patch_suggestions', [])[:3]}, ensure_ascii=False)[:12000]}
 
-BugRC generated patch:
+RCPatch generated patch:
 {json.dumps(generated_patch, ensure_ascii=False)[:12000]}
 
 Official patch:

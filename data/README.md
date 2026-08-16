@@ -1,6 +1,6 @@
 # CVE-Derived Root-Cause Data
 
-This directory contains the compact CVE-derived artifacts used by BugRC as
+This directory contains the compact CVE-derived artifacts used by RCPatch as
 weak priors for root-cause ranking.
 
 ## Files
@@ -8,7 +8,7 @@ weak priors for root-cause ranking.
 - `cve_pattern_library.v4.clean.json`
   - Reusable root-cause pattern library.
   - Contains 84 patterns mined from validated CVE root-cause annotations.
-  - Intended for direct use with `bugrc analyze --cve-pattern-library`.
+  - Intended for direct use with `rcpatch analyze --cve-pattern-library`.
 
 - `cve_pattern_library.v4.clean.summary.json`
   - Build summary for the pattern library.
@@ -19,6 +19,7 @@ weak priors for root-cause ranking.
   - Compressed CVE root-cause annotation dataset.
   - Contains 2,177 CVE-level records.
   - The uncompressed JSON has schema `bugrc.cve_root_cause_dataset.v4`.
+    The legacy schema prefix is retained for compatibility.
   - The current v4 build retains 5,285 root-cause annotations for pattern
     construction after filtering low-quality or unknown-pattern records.
 
@@ -26,7 +27,7 @@ weak priors for root-cause ranking.
 
 The dataset is built from public CVE/advisory metadata, fixing patches, source
 analysis, heuristic root-cause mining, and LLM-assisted semantic validation.
-It is not a perfect hand-labeled ground truth corpus. BugRC uses it as weak
+It is not a perfect hand-labeled ground truth corpus. RCPatch uses it as weak
 supervision: patterns can boost candidates already recovered from the analyzed
 program, but they cannot create new source locations or dependency edges.
 
@@ -44,7 +45,7 @@ Current compact counts:
 Use the pattern library as a ranking prior:
 
 ```bash
-bugrc analyze path/to/bug.json \
+rcpatch analyze path/to/bug.json \
   --parser-backend regex \
   --cve-pattern-library data/cve_pattern_library.v4.clean.json \
   --output-dir out/with-cve-prior

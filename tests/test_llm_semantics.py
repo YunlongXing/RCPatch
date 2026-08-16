@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.llm import (
+from rcpatch.llm import (
     CandidateDisambiguationInput,
     FileLLMCache,
     LLMClient,
@@ -15,7 +15,7 @@ from bugrc.llm import (
     StaticLLMProvider,
     build_candidate_label_prompt,
 )
-from bugrc.models import CandidateLabel, RootCauseCandidate, SourceLocation, TriggerPoint, TriggerType
+from rcpatch.models import CandidateLabel, RootCauseCandidate, SourceLocation, TriggerPoint, TriggerType
 
 
 class LLMSemanticsTests(unittest.TestCase):

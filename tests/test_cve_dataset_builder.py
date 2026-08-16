@@ -6,8 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.cve_mining import CVEDatasetBuildCase, CVERootCauseDatasetBuilder
-from bugrc.models import (
+from rcpatch.cve_mining import CVEDatasetBuildCase, CVERootCauseDatasetBuilder
+from rcpatch.models import (
     AdvisorySourceKind,
     CandidateLabel,
     CollectedCVERecord,

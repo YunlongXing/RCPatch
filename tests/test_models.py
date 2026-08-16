@@ -1,13 +1,13 @@
-"""Smoke tests for the BugRC data model layer."""
+"""Smoke tests for the RCPatch data model layer."""
 
 from __future__ import annotations
 
 import json
 import unittest
 
-from bugrc.errors import ModelValidationError
-from bugrc.models import AnalysisResult, BugReport, SourceLocation
-from bugrc.models.schema_registry import generate_schema_bundle
+from rcpatch.errors import ModelValidationError
+from rcpatch.models import AnalysisResult, BugReport, SourceLocation
+from rcpatch.models.schema_registry import generate_schema_bundle
 
 
 BUG_REPORT_EXAMPLE = {

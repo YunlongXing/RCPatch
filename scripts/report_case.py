@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run BugRC for a bug spec or summarize an existing result into a concise report."""
+"""Run RCPatch for a bug spec or summarize an existing result into a concise report."""
 
 from __future__ import annotations
 
@@ -19,25 +19,25 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.config import build_analysis_config_overrides, load_json_object  # noqa: E402
-from bugrc.errors import BugRCError, ModelSerializationError  # noqa: E402
-from bugrc.llm import FileLLMCache, LLMClient, OpenAICompatibleProvider, SemanticDisambiguator  # noqa: E402
-from bugrc.logging_utils import configure_logging, get_logger  # noqa: E402
-from bugrc.models import AnalysisResult, BugReport, ParserBackend  # noqa: E402
-from bugrc.pipeline import BugRCPipeline, PipelineOutputManager  # noqa: E402
-from bugrc.reporting import build_concise_report, collect_standard_artifacts, render_concise_report  # noqa: E402
+from rcpatch.config import build_analysis_config_overrides, load_json_object  # noqa: E402
+from rcpatch.errors import RCPatchError, ModelSerializationError  # noqa: E402
+from rcpatch.llm import FileLLMCache, LLMClient, OpenAICompatibleProvider, SemanticDisambiguator  # noqa: E402
+from rcpatch.logging_utils import configure_logging, get_logger  # noqa: E402
+from rcpatch.models import AnalysisResult, BugReport, ParserBackend  # noqa: E402
+from rcpatch.pipeline import RCPatchPipeline, PipelineOutputManager  # noqa: E402
+from rcpatch.reporting import build_concise_report, collect_standard_artifacts, render_concise_report  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Create the CLI parser for the generic report helper."""
     parser = argparse.ArgumentParser(
-        description="Run BugRC for a case or summarize an existing analysis_result.json into a concise report.",
+        description="Run RCPatch for a case or summarize an existing analysis_result.json into a concise report.",
     )
     source_group = parser.add_mutually_exclusive_group(required=True)
     source_group.add_argument("--spec", help="Path to a bug JSON specification to analyze and summarize.")
     source_group.add_argument(
         "--result-json",
-        help="Path to an existing analysis_result.json to summarize without rerunning BugRC.",
+        help="Path to an existing analysis_result.json to summarize without rerunning RCPatch.",
     )
     parser.add_argument(
         "--config",
@@ -46,7 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--output-dir",
-        help="Directory where BugRC artifacts and the concise report should be written.",
+        help="Directory where RCPatch artifacts and the concise report should be written.",
     )
     parser.add_argument(
         "--repo-path",
@@ -126,14 +126,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         if args.spec:
             return _handle_spec_mode(args)
         return _handle_result_mode(args)
-    except BugRCError as exc:
+    except RCPatchError as exc:
         logger.error("%s", exc)
         return 1
     except Exception as exc:  # pragma: no cover - defensive logging path
         if logger.isEnabledFor(logging.DEBUG):
-            logger.exception("Unhandled BugRC report_case failure: %s", exc)
+            logger.exception("Unhandled RCPatch report_case failure: %s", exc)
         else:
-            logger.error("Unhandled BugRC report_case failure: %s", exc)
+            logger.error("Unhandled RCPatch report_case failure: %s", exc)
         return 1
 
 
@@ -147,7 +147,7 @@ def _handle_spec_mode(args: argparse.Namespace) -> int:
         config_overrides=_config_overrides_from_args(args),
     )
     if artifacts.analysis_result is None:
-        raise BugRCError("BugRC did not produce an analysis result.")
+        raise RCPatchError("RCPatch did not produce an analysis result.")
 
     summary_text = pipeline.format_result_summary(artifacts.analysis_result)
     output_dir = output_manager.resolve_output_dir(
@@ -183,7 +183,7 @@ def _handle_result_mode(args: argparse.Namespace) -> int:
     return _write_and_print_report(output_dir=output_dir, report=report)
 
 
-def _build_pipeline(args: argparse.Namespace) -> BugRCPipeline:
+def _build_pipeline(args: argparse.Namespace) -> RCPatchPipeline:
     disambiguator = None
     if bool(args.enable_llm):
         provider = OpenAICompatibleProvider(
@@ -195,7 +195,7 @@ def _build_pipeline(args: argparse.Namespace) -> BugRCPipeline:
             cache=FileLLMCache(cache_dir=args.llm_cache_dir) if args.llm_cache_dir else FileLLMCache(),
         )
         disambiguator = SemanticDisambiguator(llm_client=llm_client)
-    return BugRCPipeline(semantic_disambiguator=disambiguator)
+    return RCPatchPipeline(semantic_disambiguator=disambiguator)
 
 
 def _config_overrides_from_args(args: argparse.Namespace) -> dict[str, object]:
@@ -214,7 +214,7 @@ def _infer_repo_path_from_neighbors(result_path: Path) -> Optional[str]:
         return None
     try:
         bug_report = BugReport.from_json_file(normalized_bug_report)
-    except (ModelSerializationError, BugRCError, ValueError):
+    except (ModelSerializationError, RCPatchError, ValueError):
         payload = load_json_object(normalized_bug_report, description="normalized bug report")
         repo_path = payload.get("repo_path")
         return repo_path if isinstance(repo_path, str) and repo_path else None

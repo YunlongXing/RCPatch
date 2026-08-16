@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import (
+from rcpatch.models import (
     AnalysisConfig,
     BugReport,
     BugType,
@@ -18,9 +18,9 @@ from bugrc.models import (
     TriggerPoint,
     TriggerType,
 )
-from bugrc.ranking import RootCauseCandidateExtractor
-from bugrc.source import SourceProjectParser
-from bugrc.slicing import HybridBackwardSlicer
+from rcpatch.ranking import RootCauseCandidateExtractor
+from rcpatch.source import SourceProjectParser
+from rcpatch.slicing import HybridBackwardSlicer
 
 
 SAMPLE_SOURCE = """\

@@ -10,7 +10,7 @@ import unittest
 from unittest import mock
 from pathlib import Path
 
-from bugrc.models import (
+from rcpatch.models import (
     AdvisoryReference,
     AdvisorySourceKind,
     CVETraceability,

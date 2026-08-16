@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Select high-value semantic CVEs for source-based BugRC validation.
+"""Select high-value semantic CVEs for source-based RCPatch validation.
 
 This is the bridge between:
 1. LLM/text-only CVE semantic pattern mining
-2. Source-based BugRC validation for precise root-cause locations
+2. Source-based RCPatch validation for precise root-cause locations
 
 It reads the semantic dataset, chooses high-confidence/high-value CVEs, then
 streams the original collection result to produce a much smaller collection JSON
@@ -32,7 +32,7 @@ if SRC_ROOT.exists():
 if VENDOR_ROOT.exists():
     sys.path.insert(0, str(VENDOR_ROOT))
 
-from bugrc.models import CollectedCVERecord  # noqa: E402
+from rcpatch.models import CollectedCVERecord  # noqa: E402
 
 
 DEFAULT_HIGH_VALUE_PATTERNS = {
@@ -63,7 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Select high-confidence/high-value semantic CVEs and emit a small collection JSON "
-            "for source-based BugRC validation."
+            "for source-based RCPatch validation."
         )
     )
     parser.add_argument("--semantic-dataset", required=True, help="Path to cve_semantic_root_cause_dataset.json.")
@@ -150,7 +150,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     write_json(
         targets_path,
         {
-            "schema_version": "bugrc.cve_source_validation_targets.v1",
+            "schema_version": "rcpatch.cve_source_validation_targets.v1",
             "metadata": {
                 "semantic_dataset": str(Path(args.semantic_dataset).expanduser().resolve()),
                 "collection_json": str(Path(args.collection_json).expanduser().resolve()),

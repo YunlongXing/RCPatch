@@ -6,15 +6,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.cve_mining import CVESemanticAligner
-from bugrc.llm import (
+from rcpatch.cve_mining import CVESemanticAligner
+from rcpatch.llm import (
     LLMClient,
     SemanticDisambiguator,
     StaticLLMProvider,
     CVECandidateAlignmentInput,
     build_cve_candidate_alignment_prompt,
 )
-from bugrc.models import (
+from rcpatch.models import (
     AdvisorySourceKind,
     CandidateLabel,
     CollectedCVERecord,

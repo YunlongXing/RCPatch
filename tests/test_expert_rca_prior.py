@@ -7,10 +7,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import AnalysisConfig, BugReport, BugType, ParserBackend, SourceLocation, TriggerPoint, TriggerType
-from bugrc.ranking import ExpertRCAPrior, RootCauseCandidateExtractor
-from bugrc.source import SourceProjectParser
-from bugrc.slicing import HybridBackwardSlicer
+from rcpatch.models import AnalysisConfig, BugReport, BugType, ParserBackend, SourceLocation, TriggerPoint, TriggerType
+from rcpatch.ranking import ExpertRCAPrior, RootCauseCandidateExtractor
+from rcpatch.source import SourceProjectParser
+from rcpatch.slicing import HybridBackwardSlicer
 
 
 SAMPLE_SOURCE = """\
@@ -34,7 +34,7 @@ def _write_expert_prior(path: Path) -> None:
     path.write_text(
         json.dumps(
             {
-                "metadata": {"schema_version": "bugrc.expert_rca_prior.v1"},
+                "metadata": {"schema_version": "rcpatch.expert_rca_prior.v1"},
                 "records": [
                     {
                         "record_id": "p0-style-size-overflow",

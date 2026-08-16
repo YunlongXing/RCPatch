@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from bugrc.models import AdvisoryReference, AdvisorySourceKind, CVETraceability, CollectedCVERecord, ReferenceType
+from rcpatch.models import AdvisoryReference, AdvisorySourceKind, CVETraceability, CollectedCVERecord, ReferenceType
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "select_cve_source_validation_targets.py"
